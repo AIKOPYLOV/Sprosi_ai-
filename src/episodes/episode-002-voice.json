@@ -3,15 +3,75 @@
   "voice": "ru-RU-SvetlanaNeural",
   "provider": "Microsoft Edge TTS",
   "lines": [
-    {"id":"hook-01","text":"До запуска неделя. А ролика всё ещё нет!","fromFrame":0,"rate":"+16%","pitch":"+2Hz"},
-    {"id":"setup-01","text":"Есть мастерская — и пустой лист сценария.","fromFrame":120,"rate":"+11%","pitch":"+1Hz"},
-    {"id":"problem-01","text":"Красивый шаблон не расскажет, чем хороша моя работа.","fromFrame":240,"rate":"+13%","pitch":"+1Hz"},
-    {"id":"client-01","text":"Клиент спрашивает: чем эта чашка особенная?","fromFrame":360,"rate":"+15%","pitch":"+2Hz"},
-    {"id":"question-01","text":"Что заставит зрителя досмотреть?","fromFrame":480,"rate":"+16%","pitch":"+2Hz"},
-    {"id":"learning-01","text":"В Академии Спроси AI учусь на своей задаче.","fromFrame":600,"rate":"+13%","pitch":"+1Hz"},
-    {"id":"mystery-01","text":"Цель — чашка. А метка — загадка.","fromFrame":720,"rate":"+14%","pitch":"+1Hz"},
-    {"id":"choice-01","text":"Каждый выбор меняет следующий кадр.","fromFrame":840,"rate":"+15%","pitch":"+1Hz"},
-    {"id":"result-01","text":"Теперь у моей работы есть своя история.","fromFrame":960,"rate":"+11%","pitch":"+1Hz"},
-    {"id":"cta-01","text":"Собери свою историю в Академии Спроси AI!","fromFrame":1080,"rate":"+16%","pitch":"+2Hz"}
+    {
+      "id": "goal-01",
+      "text": "Нет заказов. Нужна цепкая история.",
+      "fromFrame": 0,
+      "rate": "+12%",
+      "pitch": "+1Hz"
+    },
+    {
+      "id": "setup-01",
+      "text": "Телефон. Чашка в кадре. Снимаю.",
+      "fromFrame": 120,
+      "rate": "+16%",
+      "pitch": "+2Hz"
+    },
+    {
+      "id": "failure-01",
+      "text": "Красиво, но листают дальше.",
+      "fromFrame": 240,
+      "rate": "+14%",
+      "pitch": "+1Hz"
+    },
+    {
+      "id": "client-01",
+      "text": "Покупатель: «Чем она особенная?»",
+      "fromFrame": 360,
+      "rate": "+15%",
+      "pitch": "+2Hz"
+    },
+    {
+      "id": "attempt-01",
+      "text": "Кручу, меняю свет. Всё равно скучно.",
+      "fromFrame": 480,
+      "rate": "+16%",
+      "pitch": "+2Hz"
+    },
+    {
+      "id": "learning-01",
+      "text": "Открываю урок Спроси AI: ищу героя и цель.",
+      "fromFrame": 600,
+      "rate": "+13%",
+      "pitch": "+1Hz"
+    },
+    {
+      "id": "conflict-01",
+      "text": "Дочка не хочет пить чай.",
+      "fromFrame": 720,
+      "rate": "+15%",
+      "pitch": "+2Hz"
+    },
+    {
+      "id": "mystery-01",
+      "text": "На дне — звёздочка. Ждём разгадку!",
+      "fromFrame": 840,
+      "rate": "+14%",
+      "pitch": "+1Hz"
+    },
+    {
+      "id": "resolution-01",
+      "text": "Дочка допила — нашла звезду. Есть финал!",
+      "fromFrame": 960,
+      "rate": "+13%",
+      "pitch": "+1Hz"
+    },
+    {
+      "id": "cta-01",
+      "text": "Учись создавать такие истории в Академии Спроси AI.",
+      "fromFrame": 1080,
+      "rate": "+17%",
+      "pitch": "+2Hz"
+    }
   ]
 }
