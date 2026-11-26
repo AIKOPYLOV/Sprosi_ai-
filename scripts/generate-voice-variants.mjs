@@ -34,30 +34,6 @@ const fallbackVoices = {
   client: {voice_id: 'onwK4e9ZLuTAKqWW03F9', name: 'Daniel', labels: {gender: 'male'}},
 };
 
-function scoreVoice(voice, gender) {
-  const labels = voice.labels ?? {};
-  const text = `${voice.name ?? ''} ${voice.description ?? ''} ${Object.values(labels).join(' ')}`.toLowerCase();
-  let score = 0;
-  if (/russian|русск|ru-ru/.test(text)) score += 100;
-  if (/multilingual|multilingual v2/.test(text)) score += 8;
-  if (String(labels.gender ?? '').toLowerCase() === gender) score += 20;
-  if (gender === 'female' && /warm|expressive|narrat|story|character/.test(text)) score += 12;
-  if (gender === 'male' && /warm|calm|narrat|story|character/.test(text)) score += 8;
-  if (voice.category === 'premade') score += 2;
-  return score;
-}
-
-async function findVoice(gender) {
-  const response = await fetch('https://api.elevenlabs.io/v1/voices', {
-    headers: {'xi-api-key': elevenKey, Accept: 'application/json'},
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(`ElevenLabs voice list failed (${response.status}): ${data?.detail?.message ?? 'API error'}`);
-  const available = (data.voices ?? []).filter((voice) => voice.voice_id && (!voice.voice_type || ['default', 'premade'].includes(voice.voice_type)));
-  const best = available.sort((a, b) => scoreVoice(b, gender) - scoreVoice(a, gender))[0];
-  return best && scoreVoice(best, gender) >= 20 ? best : fallbackVoices[gender === 'female' ? 'hero' : 'client'];
-}
-
 function audioPart(result) {
   const parts = result?.candidates?.[0]?.content?.parts ?? [];
   const audio = parts.find((part) => part.inlineData?.data || part.inline_data?.data);
@@ -114,7 +90,7 @@ async function elevenTts(line, voice) {
   return Buffer.from(await response.arrayBuffer());
 }
 
-const voices = provider === 'google' ? {} : {hero: await findVoice('female'), client: await findVoice('male')};
+const voices = fallbackVoices;
 if (provider !== 'google') console.log(`ElevenLabs voices selected: hero=${voices.hero.name}; client=${voices.client.name}`);
 
 for (const line of script.lines) {

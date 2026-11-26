@@ -58,7 +58,7 @@ npx remotion render src/index.tsx SprosiAcademyPromoGoogle out/sprosi-ai-google-
 npx remotion render src/index.tsx SprosiAcademyPromoElevenLabs out/sprosi-ai-elevenlabs.mp4
 ```
 
-ElevenLabs выбирает из доступных голосов женский голос для героини и мужской для заказчика, предпочитая пометку Russian; если таких в аккаунте нет, использует Aria и Daniel с моделью `eleven_multilingual_v2`. В Gemini выбраны выразительный голос Aoede для героини и низкий Charon для заказчика.
+Для ElevenLabs выбрал Aria для героини и Daniel для заказчика; `eleven_multilingual_v2` поддерживает русский, поэтому генератору не нужно отдельное разрешение `voices_read`. В Gemini выбраны выразительный голос Aoede для героини и низкий Charon для заказчика.
 
 Чтобы получить оба MP4, открой **Actions → Render 2D cartoon voice variants → Run workflow**. Gemini и ElevenLabs собираются в независимых заданиях: если один API временно откажет, результат другого всё равно останется доступен. Готовое видео появится в артефакте соответствующего задания.
 
