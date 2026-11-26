@@ -27,22 +27,19 @@ const inputPath = arg('--input', 'src/episodes/template.json');
 const singleOutput = arg('--out', 'out/voice-smoke.mp3');
 let cachedAccessToken;
 
-async function loadServiceAccount() {
-  const inlineJson = process.env.GOOGLE_TTS_CREDENTIALS || process.env.SPROSI_AI_OZVUCHKA;
-  const credentialsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-  if (inlineJson?.trim().startsWith('{')) return JSON.parse(inlineJson);
-  if (credentialsPath) return JSON.parse(await fs.readFile(credentialsPath, 'utf8'));
-  if (inlineJson) {
-    throw new Error('SPROSI_AI_OZVUCHKA должен содержать JSON-ключ Google Cloud service account. API key для Cloud Text-to-Speech не поддерживается.');
-  }
-  throw new Error('Не найдены Google Cloud credentials. Локально задай GOOGLE_APPLICATION_CREDENTIALS; в GitHub Actions сохрани JSON service account в SPROSI_AI_OZVUCHKA.');
-}
-
 async function getAccessToken() {
   if (cachedAccessToken) return cachedAccessToken;
-  const account = await loadServiceAccount();
+  const directToken = process.env.GOOGLE_TTS_ACCESS_TOKEN?.trim();
+  if (directToken) return directToken;
+  const inlineCredentials = (process.env.GOOGLE_TTS_CREDENTIALS || process.env.SPROSI_AI_OZVUCHKA)?.trim();
+  const credentialsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+  if (inlineCredentials && !inlineCredentials.startsWith('{')) return inlineCredentials;
+  let account;
+  if (inlineCredentials) account = JSON.parse(inlineCredentials);
+  else if (credentialsPath) account = JSON.parse(await fs.readFile(credentialsPath, 'utf8'));
+  else throw new Error('Не найдены Google Cloud credentials. Задай GOOGLE_APPLICATION_CREDENTIALS, GOOGLE_TTS_ACCESS_TOKEN или JSON service account в SPROSI_AI_OZVUCHKA.');
   if (account.type !== 'service_account' || !account.client_email || !account.private_key) {
-    throw new Error('Ожидался JSON service-account key с type, client_email и private_key.');
+    throw new Error('JSON credential должен быть ключом service account с полями type, client_email и private_key.');
   }
   const now = Math.floor(Date.now() / 1000);
   const encode = (value) => Buffer.from(JSON.stringify(value)).toString('base64url');
