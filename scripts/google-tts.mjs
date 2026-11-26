@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
@@ -6,6 +5,20 @@ import process from 'node:process';
 function arg(name, fallback) {
   const index = process.argv.indexOf(name);
   return index === -1 ? fallback : process.argv[index + 1];
+}
+
+try {
+  const envFile = await fs.readFile('.env', 'utf8');
+  for (const line of envFile.split(/\r?\n/)) {
+    const match = line.trim().match(/^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/);
+    if (!match || process.env[match[1]] !== undefined) continue;
+    const rawValue = match[2].trim();
+    const quote = rawValue[0];
+    const quoted = rawValue.length >= 2 && (quote === '"' || quote === "'") && rawValue.at(-1) === quote;
+    process.env[match[1]] = quoted ? rawValue.slice(1, -1) : rawValue;
+  }
+} catch (error) {
+  if (error.code !== 'ENOENT') throw error;
 }
 
 const apiKey = process.env.GOOGLE_TTS_API_KEY || process.env.SPROSI_AI_OZVUCHKA;
