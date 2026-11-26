@@ -47,6 +47,7 @@ jobs:
       - name: Generate ElevenLabs voice clips
         env:
           ELEVEN_LABS9: ${{ secrets.ELEVEN_LABS9 }}
+          ELEVENLABS_VOICE_ID: ${{ vars.ELEVENLABS_VOICE_ID }}
         run: node scripts/generate-voice-variants.mjs --provider=elevenlabs
       - run: node scripts/create-sound-effects.mjs
       - run: npx remotion browser ensure

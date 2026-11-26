@@ -4,7 +4,7 @@
 
 Для двух независимых MP4 используются Gemini API key из Google AI Studio и ElevenLabs API key. Локальные переменные — `GEMINI_API_KEY` и `ELEVENLABS_API_KEY`; в GitHub Actions секреты — `SPROSI_AI_OZVUCHKA` и `ELEVEN_LABS9`. Не коммить ключи, не печатай их и не помещай в workflow inputs.
 
-Google Cloud Text-to-Speech API key и service-account JSON не используются. Gemini voice clips генерируются моделью `gemini-2.5-flash-preview-tts`: Aoede для героини, Charon для заказчика. ElevenLabs использует `eleven_multilingual_v2`, голос Aria для героини и Daniel для заказчика; доступ к каталогу голосов не запрашивается.
+Google Cloud Text-to-Speech API key и service-account JSON не используются. Gemini voice clips генерируются моделью `gemini-2.5-flash-preview-tts`: Aoede для героини, Charon для заказчика. ElevenLabs использует `eleven_multilingual_v2`, голос Aria для героини и Daniel для заказчика; доступ к каталогу голосов не запрашивается. Для собственного голоса можно добавить GitHub Actions variable `ELEVENLABS_VOICE_ID` с его voice ID.
 
 ## Проверка в GitHub Actions
 

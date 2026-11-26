@@ -90,7 +90,10 @@ async function elevenTts(line, voice) {
   return Buffer.from(await response.arrayBuffer());
 }
 
-const voices = fallbackVoices;
+const personalVoiceId = process.env.ELEVENLABS_VOICE_ID;
+const voices = personalVoiceId
+  ? {hero: {voice_id: personalVoiceId, name: 'Personal voice'}, client: {voice_id: personalVoiceId, name: 'Personal voice'}}
+  : fallbackVoices;
 if (provider !== 'google') console.log(`ElevenLabs voices selected: hero=${voices.hero.name}; client=${voices.client.name}`);
 
 for (const line of script.lines) {
