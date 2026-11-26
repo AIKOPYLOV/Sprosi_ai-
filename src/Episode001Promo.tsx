@@ -116,14 +116,14 @@ export const Room: FC<{frame: number; night?: boolean}> = ({frame, night = false
   </svg>;
 };
 
-export const Hero: FC<{frame: number; emotion?: 'scared'|'thinking'|'relieved'|'happy'; x?: number; scale?: number; speaking?:boolean; walking?:boolean}> = ({frame, emotion='scared', x=0, scale=1, speaking=false, walking=false}) => {
+export const Hero: FC<{frame: number; emotion?: 'scared'|'thinking'|'relieved'|'happy'; x?: number; scale?: number; speaking?:boolean; walking?:boolean; bottom?:number}> = ({frame, emotion='scared', x=0, scale=1, speaking=false, walking=false, bottom=95}) => {
   const blink = (frame % 103 > 96 && frame % 103 < 100) ? .12 : 1;
   const step = walking ? Math.sin(frame / 3) : 0;
   const bob = Math.sin(frame / 24) * (emotion === 'scared' ? 3 : 1.5) + (walking ? Math.abs(step) * 5 : 0);
   const talking = speaking && Math.floor(frame / 5) % 2 === 0;
   const mouth = talking ? 'M314 558 Q335 546 356 558 Q365 575 335 587 Q305 575 314 558' : emotion === 'scared' ? 'M314 558 Q335 545 356 558 Q364 595 335 614 Q306 595 314 558' : emotion === 'happy' ? 'M284 554 Q335 607 386 554 Q335 641 284 554' : emotion === 'relieved' ? 'M292 569 Q335 595 378 569' : 'M295 570 Q335 552 375 570';
   const eyes = emotion === 'scared' || emotion === 'thinking' ? 50 : 42;
-  return <div style={{position:'absolute',left:`calc(50% + ${x}px)`,bottom:95,width:670,height:1120,transform:`translateX(-50%) scale(${scale}) translateY(${bob}px)`,transformOrigin:'bottom center'}}>
+  return <div style={{position:'absolute',left:`calc(50% + ${x}px)`,bottom,width:670,height:1120,transform:`translateX(-50%) scale(${scale}) translateY(${bob}px)`,transformOrigin:'bottom center'}}>
     <svg viewBox="0 0 670 1120" width="100%" height="100%" style={{overflow:'visible'}}>
       <ellipse cx="335" cy="1090" rx="245" ry="30" fill="#141720" opacity=".5"/>
       <path d="M148 1090 Q150 812 214 754 L272 726 H398 L458 754 Q522 812 524 1090Z" fill="#3d6a83" stroke="#171b22" strokeWidth="19"/>
