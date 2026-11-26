@@ -72,6 +72,34 @@ async function googleTts(line) {
   return toMp3(audioPart(data), 'wav');
 }
 
+// Gemini preview TTS may require paid prepayment. If that account has exhausted
+// its Gemini credits, use the low-volume Cloud TTS Standard free quota instead.
+async function googleCloudTts(line) {
+  const response = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${encodeURIComponent(googleKey)}`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      input: {text: `${line.delivery}\n${line.text}`},
+      voice: {languageCode: 'ru-RU', name: line.voice === 'client' ? 'ru-RU-Standard-B' : 'ru-RU-Standard-A'},
+      audioConfig: {audioEncoding: 'MP3', speakingRate: 1.0, pitch: 0},
+    }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(`Google Cloud TTS failed (${response.status}): ${data?.error?.message ?? 'API error'}`);
+  if (!data.audioContent) throw new Error('Google Cloud TTS returned no audio.');
+  return Buffer.from(data.audioContent, 'base64');
+}
+
+async function googleVoice(line) {
+  try {
+    return await googleTts(line);
+  } catch (error) {
+    if (!/failed \(402\)/.test(error.message)) throw error;
+    console.warn('Gemini TTS credits are exhausted; trying Cloud TTS Standard.');
+    return googleCloudTts(line);
+  }
+}
+
 async function elevenTts(line, voice) {
   const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voice.voice_id)}?output_format=mp3_44100_128`, {
     method: 'POST',
@@ -98,7 +126,7 @@ if (provider !== 'google') console.log(`ElevenLabs voices selected: hero=${voice
 
 for (const line of script.lines) {
   const outputs = [];
-  if (['both', 'google'].includes(provider)) outputs.push(['google', await googleTts(line)]);
+  if (['both', 'google'].includes(provider)) outputs.push(['google', await googleVoice(line)]);
   if (['both', 'elevenlabs'].includes(provider)) {
     const voice = line.voice === 'client' ? voices.client : voices.hero;
     outputs.push(['elevenlabs', await elevenTts(line, voice)]);

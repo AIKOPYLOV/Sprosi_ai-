@@ -8,7 +8,7 @@ permissions:
 
 jobs:
   google-tts:
-    name: Gemini TTS version
+    name: Google TTS version
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
@@ -18,7 +18,7 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - name: Generate Gemini voice clips
+      - name: Generate Google voice clips (Gemini with Cloud TTS fallback)
         env:
           SPROSI_AI_OZVUCHKA: ${{ secrets.SPROSI_AI_OZVUCHKA }}
         run: node scripts/generate-voice-variants.mjs --provider=google
