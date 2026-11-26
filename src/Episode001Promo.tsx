@@ -25,8 +25,8 @@ const script = voiceScript.lines;
 const clamp = {extrapolateLeft: 'clamp' as const, extrapolateRight: 'clamp' as const};
 
 const Room: FC<{frame: number; night?: boolean}> = ({frame, night = false}) => {
-  const glow = 0.3 + (Math.sin(frame / 13) + 1) * 0.035;
-  const wheelTurn = frame * 1.8;
+  const glow = 0.31 + Math.sin(frame / 48) * 0.018;
+  const wheelTurn = frame * 0.42;
   const dust = [
     {x: 536, y: 846, speed: 0.5, phase: 0},
     {x: 744, y: 740, speed: 0.35, phase: 29},
@@ -97,7 +97,7 @@ const Room: FC<{frame: number; night?: boolean}> = ({frame, night = false}) => {
     <rect x="0" y="1131" width="1080" height="123" fill="url(#tableGrain)"/>
     <path d="M69 1252L45 1412H147L178 1252 M894 1252L921 1412H1021L1001 1252" fill="#684938" stroke="#171b22" strokeWidth="16"/>
     <path d="M0 1254H1080" stroke="#171b22" strokeWidth="14"/>
-    <path d="M456 1082L504 1065L593 1089L571 1106L476 1101Z" fill="#d9c5a1" stroke="#171b22" strokeWidth="9" transform={`rotate(${Math.sin(frame/20)*1.5} 520 1080)`}/>
+    <path d="M456 1082L504 1065L593 1089L571 1106L476 1101Z" fill="#d9c5a1" stroke="#171b22" strokeWidth="9" transform={`rotate(${Math.sin(frame/58)*0.35} 520 1080)`}/>
     <path d="M484 1090Q509 1075 535 1083T574 1085" fill="none" stroke="#875e49" strokeWidth="6"/>
     <path d="M591 1096L673 1081" stroke="#171b22" strokeWidth="10" strokeLinecap="round"/><path d="M594 1093L668 1081" stroke="#d2a15b" strokeWidth="6" strokeLinecap="round"/>
     <path d="M128 1096V1137 M153 1096V1138" stroke="#171b22" strokeWidth="11"/>
@@ -112,14 +112,14 @@ const Room: FC<{frame: number; night?: boolean}> = ({frame, night = false}) => {
       <path d="M302 1040L293 982 M310 1040L323 974 M318 1042L345 998 M299 1038L279 1001" stroke="#171b22" strokeWidth="9" strokeLinecap="round"/>
       <path d="M292 1000L297 963 M323 1002L333 958 M344 1005L358 981 M279 1007L263 980" stroke="#dfb06b" strokeWidth="6" strokeLinecap="round"/>
     </g>
-    {dust.map((p,i)=>{const y=((p.y-frame*p.speed+p.phase)%1120+1120)%1120+260;const x=p.x+Math.sin(frame/27+i)*18;return <circle key={`dust-${i}`} cx={x} cy={y} r={i%2?3:4} fill="#ffe0a1" opacity={.23+Math.sin(frame/9+i)*.08}/>})}
+    {dust.map((p,i)=>{const y=((p.y-frame*p.speed+p.phase)%1120+1120)%1120+260;const x=p.x+Math.sin(frame/70+i)*5;return <circle key={`dust-${i}`} cx={x} cy={y} r={i%2?3:4} fill="#ffe0a1" opacity={.22+Math.sin(frame/55+i)*.035}/>})}
   </svg>;
 };
 
 const Hero: FC<{frame: number; emotion?: 'scared'|'thinking'|'relieved'|'happy'; x?: number; scale?: number; speaking?:boolean}> = ({frame, emotion='scared', x=0, scale=1, speaking=false}) => {
   const blink = (frame % 103 > 96 && frame % 103 < 100) ? .12 : 1;
-  const bob = Math.sin(frame / 6) * (emotion === 'scared' ? 8 : 4);
-  const talking = speaking && Math.floor(frame / 4) % 2 === 0;
+  const bob = Math.sin(frame / 24) * (emotion === 'scared' ? 3 : 1.5);
+  const talking = speaking && Math.floor(frame / 8) % 2 === 0;
   const mouth = talking ? 'M314 558 Q335 546 356 558 Q365 575 335 587 Q305 575 314 558' : emotion === 'scared' ? 'M314 558 Q335 545 356 558 Q364 595 335 614 Q306 595 314 558' : emotion === 'happy' ? 'M284 554 Q335 607 386 554 Q335 641 284 554' : emotion === 'relieved' ? 'M292 569 Q335 595 378 569' : 'M295 570 Q335 552 375 570';
   const eyes = emotion === 'scared' || emotion === 'thinking' ? 50 : 42;
   return <div style={{position:'absolute',left:`calc(50% + ${x}px)`,bottom:95,width:670,height:1120,transform:`translateX(-50%) scale(${scale}) translateY(${bob}px)`,transformOrigin:'bottom center'}}>
@@ -127,8 +127,8 @@ const Hero: FC<{frame: number; emotion?: 'scared'|'thinking'|'relieved'|'happy';
       <ellipse cx="335" cy="1090" rx="245" ry="30" fill="#141720" opacity=".5"/>
       <path d="M148 1090 Q150 812 214 754 L272 726 H398 L458 754 Q522 812 524 1090Z" fill="#3d6a83" stroke="#171b22" strokeWidth="19"/>
       <path d="M279 730 L335 798 393 730" fill="#f1e6d5" stroke="#171b22" strokeWidth="12"/>
-      <path d="M169 918 Q77 867 105 799 Q127 750 164 790 L235 850" fill="#d9a77e" stroke="#171b22" strokeWidth="20" transform={`rotate(${Math.sin(frame/8)*8} 170 880)`}/>
-      <path d="M501 920 Q591 854 565 798 Q544 754 511 795 L442 852" fill="#d9a77e" stroke="#171b22" strokeWidth="20" transform={`rotate(${-Math.sin(frame/8)*8} 500 880)`}/>
+      <path d="M169 918 Q77 867 105 799 Q127 750 164 790 L235 850" fill="#d9a77e" stroke="#171b22" strokeWidth="20" transform={`rotate(${Math.sin(frame/28)*2} 170 880)`}/>
+      <path d="M501 920 Q591 854 565 798 Q544 754 511 795 L442 852" fill="#d9a77e" stroke="#171b22" strokeWidth="20" transform={`rotate(${-Math.sin(frame/28)*2} 500 880)`}/>
       <path d="M288 620 Q335 658 382 620 C367 665 370 690 386 726 Q335 754 284 726 C300 690 303 665 288 620Z" fill="#edc29c" stroke="#171b22" strokeWidth="17"/>
       <path d="M221 425 Q181 315 226 235 Q263 150 344 156 Q443 148 477 245 Q515 342 466 442Z" fill="#45332d" stroke="#171b22" strokeWidth="19"/>
       <ellipse cx="335" cy="479" rx="177" ry="202" fill="#edc29c" stroke="#171b22" strokeWidth="19"/>
@@ -144,7 +144,7 @@ const Hero: FC<{frame: number; emotion?: 'scared'|'thinking'|'relieved'|'happy';
 };
 
 const Mug: FC<{frame:number; x?:number; y?:number; tilt?:number; generic?:boolean}> = ({frame,x=0,y=0,tilt=0,generic=false}) => {
-  const wobble = Math.sin(frame/5)*3;
+  const wobble = Math.sin(frame/38)*0.7;
   return <svg viewBox="0 0 300 320" style={{position:'absolute',width:300,height:320,left:`calc(50% + ${x}px)`,top:y,transform:`translateX(-50%) rotate(${tilt+wobble}deg)`,filter:'drop-shadow(0 18px 10px #1118)'}}>
     <path d="M196 83 Q285 65 274 145 Q266 203 206 193" fill="none" stroke="#181d24" strokeWidth="25"/>
     <path d="M196 83 Q285 65 274 145 Q266 203 206 193" fill="none" stroke={generic?'#d6d0c7':'#d9a37e'} strokeWidth="17"/>
@@ -156,7 +156,7 @@ const Mug: FC<{frame:number; x?:number; y?:number; tilt?:number; generic?:boolea
 };
 
 const Phone: FC<{frame:number; message:string; tilt?:number}> = ({frame,message,tilt=0}) => {
-  const pop = interpolate(frame%150,[0,12],[.4,1],{...clamp,easing:Easing.out(Easing.back(1.4))});
+  const pop = interpolate(frame%150,[0,12],[.5,1],{...clamp,easing:Easing.out(Easing.cubic)});
   return <div style={{position:'absolute',right:80,top:390,width:310,height:560,borderRadius:48,border:'13px solid #131923',background:'#e9e7df',transform:`rotate(${tilt}deg) scale(${pop})`,boxShadow:'0 26px 50px #080b11aa',padding:22,boxSizing:'border-box'}}>
     <div style={{height:8,width:88,borderRadius:8,background:'#222833',margin:'0 auto 30px'}}/><div style={{font:'700 22px Arial',color:'#515766'}}>СЕГОДНЯ · 09:41</div>
     <div style={{marginTop:28,padding:20,borderRadius:20,background:'#fff',font:'600 26px/1.2 Arial',color:'#20242a'}}><b>Заказчик</b><br/>{message}</div>
@@ -165,7 +165,7 @@ const Phone: FC<{frame:number; message:string; tilt?:number}> = ({frame,message,
 };
 
 const BigText: FC<{children:string; color?:string; top?:number; size?:number; rotate?:number}> = ({children,color='#fff7e9',top=185,size=68,rotate=-2}) => {
-  const f=useCurrentFrame(); const scale=interpolate(f,[0,10],[.78,1],{...clamp,easing:Easing.out(Easing.back(1.5))});
+  const f=useCurrentFrame(); const scale=interpolate(f,[0,10],[.9,1],{...clamp,easing:Easing.out(Easing.cubic)});
   return <div style={{position:'absolute',top,left:48,right:48,textAlign:'center',font:'1000 '+size+'px/1.02 Arial,sans-serif',letterSpacing:-2,color,textShadow:'0 8px 0 #1b1c24, 0 13px 25px #090a0dcc',WebkitTextStroke:'2px #191b22',transform:`rotate(${rotate}deg) scale(${scale})`}}>{children}</div>;
 };
 
@@ -189,8 +189,8 @@ const Scene: FC<{index:number}> = ({index}) => {
     <><Room frame={global} night/><Phone frame={global} message="Запуск уже через три недели. Видео будет?" tilt={4}/><Hero frame={global} emotion="scared" x={-105} speaking={speaking}/><BigText top={180} size={76} color="#ffd74f">ТРИ НЕДЕЛИ</BigText><div style={{position:'absolute',top:300,left:98,right:98,textAlign:'center',font:'900 47px Arial',color:'#fff',textShadow:'0 3px 10px #111'}}>А ВИДЕО — ПУСТО!</div></>,
     <><Room frame={global}/><div style={{position:'absolute',top:320,left:80,width:535,height:640,border:'20px solid #10151f',borderRadius:36,background:'linear-gradient(140deg,#d78545,#f3d28f 45%,#548c87)',boxShadow:'0 22px 45px #10131aaa'}}><div style={{position:'absolute',top:45,left:45,right:45,bottom:45,border:'5px solid #fff7e8aa',borderRadius:26}}/><div style={{position:'absolute',top:205,left:150,transform:'rotate(-13deg)'}}><Mug frame={global} generic/></div><div style={{position:'absolute',bottom:30,left:14,right:14,textAlign:'center',font:'900 31px Arial',color:'white'}}>ИДЕАЛЬНАЯ ЧАШКА?</div></div><div style={{position:'absolute',top:360,right:35,width:330,height:600,background:'#eee3d0',border:'17px solid #151a22',borderRadius:30,transform:'rotate(5deg)'}}><div style={{position:'absolute',top:40,left:40,font:'800 28px Arial',color:'#30333a'}}>МОЯ ЧАШКА</div><div style={{top:115,left:20,transform:'scale(.8)',position:'absolute'}}><Mug frame={global} generic={false}/></div></div><Hero frame={global} emotion="thinking" x={0} scale={.79} speaking={speaking}/><BigText top={190} size={50} color="#ffdd67">КРАСИВО. НО НЕ МОЁ.</BigText></>,
     <><Room frame={global} night/><Hero frame={global} emotion="scared" x={-190} scale={.72} speaking={speaking}/><div style={{position:'absolute',top:390,left:70,right:70,display:'flex',gap:18}}><RiskCard color="#e76355" title="ВЫЛОЖИТЬ" sub="бренд не узнать" frame={frame}/><RiskCard color="#e9b949" title="ПЕРЕДЕЛАТЬ" sub="можно не успеть" frame={frame-8}/></div><div style={{position:'absolute',top:920,left:130,right:130,textAlign:'center',font:'1000 55px Arial',color:'#fff7e9',textShadow:'0 5px 0 #121720'}}>ОБА ВАРИАНТА — С РИСКОМ</div><Mug frame={global} x={0} y={1120} tilt={-12}/></>,
-    <><Room frame={global}/><div style={{position:'absolute',top:330,left:80,right:80,height:610,border:'18px solid #151a22',borderRadius:36,background:'linear-gradient(135deg,#f0b66a,#e28456,#8c4c63)',overflow:'hidden',transform:`rotate(${Math.sin(frame/10)*2}deg)`}}><div style={{position:'absolute',top:125,left:265,transform:'scale(1.1) rotate(-9deg)'}}><Mug frame={global} generic/></div><div style={{position:'absolute',left:0,right:0,bottom:30,textAlign:'center',font:'900 36px Arial',color:'white'}}>НОВИНКА · КОЛЛЕКЦИЯ</div></div><Hero frame={global} emotion={frame<66?'relieved':'thinking'} x={-115} scale={.77} speaking={speaking}/><div style={{position:'absolute',top:1010,right:110,font:'900 72px Arial',color:'#74e5b8',textShadow:'0 5px #17312d'}}>{frame<65?'ГОТОВО!':'…'}</div><Phone frame={global} message="А чем она особенная?" tilt={-3}/></>,
-    <><Room frame={global} night/><Hero frame={global} emotion="thinking" x={-170} scale={.7}/><Phone frame={global} message="А чем она особенная?" tilt={-5}/><BigText top={205} size={61} color="#ffd94f">И ВОТ ВОПРОС…</BigText><div style={{position:'absolute',top:1010,left:75,right:75,padding:24,borderRadius:25,background:'#fff8e9',color:'#262931',font:'900 44px Arial',textAlign:'center',transform:`rotate(${Math.sin(frame/8)*1.5}deg)`}}>ЧЕМ ОНА ОТЛИЧАЕТСЯ?</div><Mug frame={global} x={-240} y={1130}/></>,
+    <><Room frame={global}/><div style={{position:'absolute',top:330,left:80,right:80,height:610,border:'18px solid #151a22',borderRadius:36,background:'linear-gradient(135deg,#f0b66a,#e28456,#8c4c63)',overflow:'hidden',transform:'rotate(-0.35deg)'}}><div style={{position:'absolute',top:125,left:265,transform:'scale(1.1) rotate(-9deg)'}}><Mug frame={global} generic/></div><div style={{position:'absolute',left:0,right:0,bottom:30,textAlign:'center',font:'900 36px Arial',color:'white'}}>НОВИНКА · КОЛЛЕКЦИЯ</div></div><Hero frame={global} emotion={frame<66?'relieved':'thinking'} x={-115} scale={.77} speaking={speaking}/><div style={{position:'absolute',top:1010,right:110,font:'900 72px Arial',color:'#74e5b8',textShadow:'0 5px #17312d'}}>{frame<65?'ГОТОВО!':'…'}</div><Phone frame={global} message="А чем она особенная?" tilt={-3}/></>,
+    <><Room frame={global} night/><Hero frame={global} emotion="thinking" x={-170} scale={.7}/><Phone frame={global} message="А чем она особенная?" tilt={-5}/><BigText top={205} size={61} color="#ffd94f">И ВОТ ВОПРОС…</BigText><div style={{position:'absolute',top:1010,left:75,right:75,padding:24,borderRadius:25,background:'#fff8e9',color:'#262931',font:'900 44px Arial',textAlign:'center',transform:'rotate(-0.35deg)'}}>ЧЕМ ОНА ОТЛИЧАЕТСЯ?</div><Mug frame={global} x={-240} y={1130}/></>,
     <>
       <Room frame={global}/>
       <div style={{position:'absolute',top:90,left:55,right:55,textAlign:'center',font:'1000 42px Arial',letterSpacing:1,color:'#fff4dd',textShadow:'0 5px 0 #171b22,0 9px 18px #111a'}}>УЧУСЬ НА СВОЕЙ ЗАДАЧЕ</div>
@@ -200,9 +200,9 @@ const Scene: FC<{index:number}> = ({index}) => {
       </div>
       <div style={{position:'absolute',top:415,left:95,padding:'16px 20px',borderRadius:17,background:'#f4c84e',border:'5px solid #171b22',color:'#171b22',font:'900 25px Arial',transform:`rotate(-6deg) translateX(${interpolate(frame,[0,16],[-180,0],clamp)}px)`}}>УРОК 02 · СЦЕНАРИЙ</div>
       <Hero frame={global} emotion="happy" x={-335+interpolate(frame,[0,18],[-170,0],clamp)} scale={.47} speaking={speaking}/>
-      <div style={{position:'absolute',bottom:140,left:140,right:140,display:'flex',justifyContent:'center',gap:12}}>{['ИДЕЯ','СЦЕНЫ','ЗВУК'].map((t,i)=><div key={t} style={{padding:'14px 18px',borderRadius:16,background:['#e7b64d','#d87258','#56a393'][i],border:'4px solid #171b22',color:'#fff',font:'900 22px Arial',transform:`translateY(${Math.sin(frame/7+i)*7}px) rotate(${i-1}deg)`}}>{t}</div>)}</div>
+      <div style={{position:'absolute',bottom:140,left:140,right:140,display:'flex',justifyContent:'center',gap:12}}>{['ИДЕЯ','СЦЕНЫ','ЗВУК'].map((t,i)=><div key={t} style={{padding:'14px 18px',borderRadius:16,background:['#e7b64d','#d87258','#56a393'][i],border:'4px solid #171b22',color:'#fff',font:'900 22px Arial',transform:`translateY(${Math.sin(frame/32+i)*2}px) rotate(${i-1}deg)`}}>{t}</div>)}</div>
     </>,
-    <><Room frame={global}/><Hero frame={global} emotion="happy" x={-190} speaking={speaking}/><div style={{position:'absolute',top:350,right:45,width:430,height:560,borderRadius:36,background:'linear-gradient(135deg,#e8b58b,#f7e2bd)',border:'16px solid #171c25',transform:`rotate(${Math.sin(frame/14)*3}deg)`}}><div style={{position:'absolute',inset:18,border:'4px solid #fff8e6',borderRadius:22}}/><div style={{position:'absolute',top:115,left:65,transform:'scale(1.15) rotate(9deg)'}}><Mug frame={global}/></div><div style={{position:'absolute',bottom:25,left:20,right:20,textAlign:'center',font:'900 31px Arial',color:'#25343b'}}>СДЕЛАНО ВРУЧНУЮ</div></div><div style={{position:'absolute',top:1460,left:90,right:90,padding:28,borderRadius:25,background:'#fff8e9',color:'#252831',font:'800 36px/1.16 Arial',textAlign:'center',boxShadow:'0 14px 25px #10131a55'}}>Теперь это похоже на мой бренд.</div><div style={{position:'absolute',top:190,left:145,right:95,display:'flex',alignItems:'center',justifyContent:'center',gap:14,padding:'12px 18px',borderRadius:28,background:'#171b22e8',border:'4px solid #f0c449'}}><Img src={staticFile(BASE+'academy-mark.svg')} style={{width:54,height:50}}/><div style={{font:'900 27px Arial',color:'#fff8ec',textShadow:'0 3px 8px #151a22'}}>АКАДЕМИЯ СПРОСИ AI<br/><span style={{fontSize:19,fontWeight:600}}>sprosi-ai-mockup.vercel.app/app/</span></div></div></>,
+    <><Room frame={global}/><Hero frame={global} emotion="happy" x={-190} speaking={speaking}/><div style={{position:'absolute',top:350,right:45,width:430,height:560,borderRadius:36,background:'linear-gradient(135deg,#e8b58b,#f7e2bd)',border:'16px solid #171c25',transform:'rotate(0.4deg)'}}><div style={{position:'absolute',inset:18,border:'4px solid #fff8e6',borderRadius:22}}/><div style={{position:'absolute',top:115,left:65,transform:'scale(1.15) rotate(9deg)'}}><Mug frame={global}/></div><div style={{position:'absolute',bottom:25,left:20,right:20,textAlign:'center',font:'900 31px Arial',color:'#25343b'}}>СДЕЛАНО ВРУЧНУЮ</div></div><div style={{position:'absolute',top:1460,left:90,right:90,padding:28,borderRadius:25,background:'#fff8e9',color:'#252831',font:'800 36px/1.16 Arial',textAlign:'center',boxShadow:'0 14px 25px #10131a55'}}>Теперь это похоже на мой бренд.</div><div style={{position:'absolute',top:190,left:145,right:95,display:'flex',alignItems:'center',justifyContent:'center',gap:14,padding:'12px 18px',borderRadius:28,background:'#171b22e8',border:'4px solid #f0c449'}}><Img src={staticFile(BASE+'academy-mark.svg')} style={{width:54,height:50}}/><div style={{font:'900 27px Arial',color:'#fff8ec',textShadow:'0 3px 8px #151a22'}}>АКАДЕМИЯ СПРОСИ AI<br/><span style={{fontSize:19,fontWeight:600}}>sprosi-ai-mockup.vercel.app/app/</span></div></div></>,
   ];
   return <AbsoluteFill style={{overflow:'hidden',background:'#171b24'}}><div style={{position:'absolute',inset:0,transform:`scale(${camera}) translate(${cameraX}px,${cameraY}px)`,transformOrigin:'center center'}}>{shots[index]}</div>
     <div style={{position:'absolute',top:45,left:36,padding:'10px 18px',borderRadius:18,background:'#171b24dd',color:'#fff4e4',font:'800 20px Arial',letterSpacing:1}}>СПРОСИ AI · {String(index+1).padStart(2,'0')}</div>
@@ -211,7 +211,7 @@ const Scene: FC<{index:number}> = ({index}) => {
   </AbsoluteFill>;
 };
 
-const RiskCard: FC<{color:string;title:string;sub:string;frame:number}> = ({color,title,sub,frame}) => {const y=interpolate(frame,[0,12],[140,0],clamp);return <div style={{flex:1,height:315,alignSelf:'flex-start',borderRadius:25,background:color,color:'#fff',padding:22,boxSizing:'border-box',transform:`translateY(${y}px) rotate(${frame%2?2:-2}deg)`,boxShadow:'0 15px 35px #111a',border:'5px solid #181d25'}}><div style={{font:'1000 40px Arial',textAlign:'center'}}>{title}</div><div style={{marginTop:25,textAlign:'center',font:'800 30px/1.1 Arial'}}>{sub}</div></div>};
+const RiskCard: FC<{color:string;title:string;sub:string;frame:number}> = ({color,title,sub,frame}) => {const y=interpolate(frame,[0,12],[140,0],clamp);return <div style={{flex:1,height:315,alignSelf:'flex-start',borderRadius:25,background:color,color:'#fff',padding:22,boxSizing:'border-box',transform:`translateY(${y}px) rotate(${frame < 12 ? 0 : title === 'ВЫЛОЖИТЬ' ? -1.2 : 1.2}deg)`,boxShadow:'0 15px 35px #111a',border:'5px solid #181d25'}}><div style={{font:'1000 40px Arial',textAlign:'center'}}>{title}</div><div style={{marginTop:25,textAlign:'center',font:'800 30px/1.1 Arial'}}>{sub}</div></div>};
 
 const captions=['ДО ЗАПУСКА ТРИ НЕДЕЛИ. А ВИДЕО — ПУСТО.','ПЕРВЫЙ РОЛИК КРАСИВЫЙ. НО ЧАШКА — НЕ МОЯ.','ВЫЛОЖИТЬ ИЛИ ПЕРЕДЕЛАТЬ? ВЕЗДЕ РИСК.','ВРОДЕ ГОТОВО…','«А ЧЕМ ОНА ОСОБЕННАЯ?»','СЦЕНАРИЙ · ГЕРОИ · СЦЕНЫ · ЗВУК','ТВОЯ ИСТОРИЯ МОЖЕТ НАЧАТЬСЯ ЗДЕСЬ'];
 const Caption: FC<{index:number}> = ({index}) => {const f=useCurrentFrame();const enter=interpolate(f,[0,8],[.8,1],{...clamp,easing:Easing.out(Easing.back(1.4))});return <div style={{position:'absolute',bottom:112,left:48,right:48,padding:'19px 24px',borderRadius:22,background:index===4?'#fff7e9':'#121720e8',color:index===4?'#20232c':'#fff9ed',font:'900 30px/1.1 Arial',textAlign:'center',boxShadow:'0 9px 25px #090b10aa',transform:`scale(${enter})`,borderBottom:'5px solid #f0c449'}}>{captions[index]}</div>};
