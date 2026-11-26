@@ -1,0 +1,31 @@
+name: Google TTS smoke test
+
+on:
+  workflow_dispatch:
+    inputs:
+      text:
+        description: Short Russian phrase to synthesize
+        required: true
+        default: "Проверка озвучки Академии Спроси AI."
+
+permissions:
+  contents: read
+
+jobs:
+  synthesize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Call Google Cloud Text-to-Speech
+        env:
+          GOOGLE_TTS_API_KEY: ${{ secrets.SPROSI_AI_OZVUCHKA }}
+          TTS_TEXT: ${{ inputs.text }}
+        run: node scripts/google-tts.mjs --text "$TTS_TEXT" --out out/google-tts-smoke.mp3
+      - uses: actions/upload-artifact@v4
+        with:
+          name: google-tts-smoke
+          path: out/google-tts-smoke.mp3
+          if-no-files-found: error
