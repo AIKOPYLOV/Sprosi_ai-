@@ -17,10 +17,10 @@ try {
   if (error.code !== 'ENOENT') throw error;
 }
 
-const scriptPath = process.argv[2] ?? 'src/episodes/episode-001-voice.json';
-const script = JSON.parse(await fs.readFile(scriptPath, 'utf8'));
 const provider = process.argv.find((arg) => arg.startsWith('--provider='))?.split('=')[1] ?? 'both';
 if (!['both', 'google', 'elevenlabs'].includes(provider)) throw new Error('Provider must be both, google, or elevenlabs.');
+const scriptPath = process.argv.slice(2).find((arg) => !arg.startsWith('--')) ?? 'src/episodes/episode-001-voice.json';
+const script = JSON.parse(await fs.readFile(scriptPath, 'utf8'));
 const googleKey = process.env.SPROSI_AI_OZVUCHKA || process.env.GEMINI_API_KEY;
 const elevenKey = process.env.ELEVEN_LABS9 || process.env.ELEVENLABS_API_KEY;
 const googleModel = process.env.GEMINI_TTS_MODEL || 'gemini-2.5-flash-preview-tts';
