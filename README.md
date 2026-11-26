@@ -1,6 +1,6 @@
 # Спроси AI — 2D-мультфильмы
 
-Рабочая база для разработки коротких 2D-историй и вертикальных роликов для Reels. В репозитории собраны драматургическая схема из материалов проекта, визуальные правила, шаблон раскадровки, Remotion-композиция и озвучка через Gemini TTS.
+Рабочая база для разработки коротких 2D-историй и вертикальных роликов для Reels. В репозитории собраны драматургическая схема из PDF, визуальные правила, шаблон раскадровки и Remotion-композиция с покадровым движением. Для каждого эпизода можно собрать отдельные видео с Gemini TTS и ElevenLabs.
 
 ## Что здесь есть
 
@@ -8,12 +8,18 @@
 - `docs/story-structure.md` — хук, рост напряжения, конфликт, возвращение, повторный рост и развязка; схема сценария и удержания из PDF.
 - `docs/visual-style.md` — художественное направление и правила непрерывности персонажей.
 - `docs/production-workflow.md` — процесс от идеи до вертикального MP4.
-- `docs/google-tts.md` — настройки Gemini TTS; секрет GitHub Actions ожидается под именем `SPROSI_AI_OZVUCHKA`.
+- `docs/google-tts.md` — настройки обеих систем озвучки и запуск генерации.
 - `src/episodes/template.json` — структурированный шаблон эпизода и планов.
 - `src/StoryboardAnimatic.tsx` — черновая вертикальная композиция для проверки ритма и длины сцен до финальной иллюстрации.
+- `src/Episode001Promo.tsx` — динамичный рисованный ролик 9:16: героиня, жесты, эмоции, реквизит, въезды титров и движения камеры.
+- `src/episodes/episode-001-voice.json` — единый сценарий реплик и подачи для обоих вариантов озвучки.
+- `src/episodes/episode-001.json` — драматургическая карта истории.
+- `public/episodes/episode-001/` — листы персонажа и локации, ключевые кадры, знак Академии и снимок реального экрана курса.
 - `scripts/validate-episode.mjs` — проверка структуры сценария.
-- `scripts/google-tts.mjs` — генерация отдельных WAV-файлов для реплик через Gemini TTS.
+- `scripts/generate-voice-variants.mjs` — отдельные реплики для Gemini TTS и ElevenLabs; секреты не выводятся в логи.
+- `scripts/create-sound-effects.mjs` — оригинальные короткие звуковые эффекты, генерируемые локально.
 - `.github/workflows/google-tts-smoke.yml` — ручная проверка Gemini API key без вывода ключа в логи.
+- `.github/workflows/render-cartoon.yml` — сборка двух MP4 в GitHub Actions.
 
 ## Быстрый старт
 
@@ -25,6 +31,8 @@ npm run studio
 ```
 
 Studio откроет черновую раскадровку `StoryboardAnimatic`. Она намеренно не содержит готовых героев или готовой истории: сначала заполняем сценарий и утверждаем дизайн персонажей, затем заменяем карточки планов на художественные сцены.
+
+В Studio доступны `SprosiAcademyPromoGoogle` и `SprosiAcademyPromoElevenLabs`. Обе композиции показывают одну 35-секундную историю; генерация аудио нужна перед рендером.
 
 ## Подготовка эпизода
 
@@ -38,13 +46,19 @@ Studio откроет черновую раскадровку `StoryboardAnimati
 
 Подробности и критерии качества — в `docs/` и `AGENTS.md`.
 
-## Gemini TTS
+## Два варианта озвучки
 
-Локально скопируйте `.env.example` в `.env` и укажите Gemini API key в `GEMINI_API_KEY`. В GitHub Actions ключ хранится в секрете `SPROSI_AI_OZVUCHKA`.
+Для локальной сборки добавьте в `.env` переменные `GEMINI_API_KEY` и `ELEVENLABS_API_KEY`. В GitHub Secrets должны быть `SPROSI_AI_OZVUCHKA` (Gemini API key) и `ELEVEN_LABS9` (ElevenLabs API key). Значения ключей не сохраняются в файлах или логах.
 
 ```bash
-npm run tts -- --input src/episodes/episode-001.json
+node scripts/generate-voice-variants.mjs --provider=google
+node scripts/generate-voice-variants.mjs --provider=elevenlabs
+node scripts/create-sound-effects.mjs
+npx remotion render src/index.tsx SprosiAcademyPromoGoogle out/sprosi-ai-google-tts.mp4
+npx remotion render src/index.tsx SprosiAcademyPromoElevenLabs out/sprosi-ai-elevenlabs.mp4
 ```
 
-Запусти **Actions → Gemini TTS smoke test → Run workflow**. Успешный вызов создаст WAV-артефакт `google-tts-smoke`; workflow не печатает значение секрета.
+ElevenLabs выбирает из доступных голосов женский голос для героини и мужской для заказчика, предпочитая пометку Russian; если таких в аккаунте нет, использует Aria и Daniel с моделью `eleven_multilingual_v2`. В Gemini выбраны выразительный голос Aoede для героини и низкий Charon для заказчика.
+
+Чтобы получить оба MP4, открой **Actions → Render 2D cartoon voice variants → Run workflow**. Gemini и ElevenLabs собираются в независимых заданиях: если один API временно откажет, результат другого всё равно останется доступен. Готовое видео появится в артефакте соответствующего задания.
 

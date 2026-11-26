@@ -1,38 +1,26 @@
-# Gemini TTS через Gemini API
+# Озвучка эпизодов: Gemini TTS и ElevenLabs
 
 ## Ключ
 
-Для озвучки используется Gemini API key из Google AI Studio. Локально сохрани его как `GEMINI_API_KEY` в `.env`. Для GitHub Actions секрет называется `SPROSI_AI_OZVUCHKA`. Не коммить ключ, не печатай его и не помещай в workflow inputs.
+Для двух независимых MP4 используются Gemini API key из Google AI Studio и ElevenLabs API key. Локальные переменные — `GEMINI_API_KEY` и `ELEVENLABS_API_KEY`; в GitHub Actions секреты — `SPROSI_AI_OZVUCHKA` и `ELEVEN_LABS9`. Не коммить ключи, не печатай их и не помещай в workflow inputs.
 
-Обычный Google Cloud Text-to-Speech API key и service-account JSON не используются этим скриптом. Запрос идёт к модели `gemini-2.5-flash-preview-tts`; ключ передаётся через заголовок `x-goog-api-key`.
+Google Cloud Text-to-Speech API key и service-account JSON не используются. Gemini voice clips генерируются моделью `gemini-2.5-flash-preview-tts`: Aoede для героини, Charon для заказчика. ElevenLabs использует `eleven_multilingual_v2` и подбирает голоса для обоих персонажей по меткам русского языка и пола из доступных голосов; запасные варианты — Aria и Daniel.
 
 ## Проверка в GitHub Actions
 
-1. В `SPROSI_AI_OZVUCHKA` должен быть Gemini API key из AI Studio.
-2. Открой **Actions → Gemini TTS smoke test → Run workflow**.
-3. После успешного вызова скачай артефакт `google-tts-smoke` и прослушай его.
+Открой **Actions → Render 2D cartoon voice variants → Run workflow**. GitHub выполнит две независимые задачи и приложит к каждой MP4 отдельный артефакт: `sprosi-ai-google-tts` и `sprosi-ai-elevenlabs`. Значения API ключей не появляются в workflow inputs.
 
-Ключ может быть валидным, но синтез всё равно не пройдёт без доступных Gemini API credits/billing. Ошибка `402` означает, что кредиты проекта закончились или не настроена предоплата.
+Если Google AI Studio отвечает `402`, задача Gemini не сможет создать свою версию, но ElevenLabs job продолжит сборку независимо. Это ошибка оплаты/кредитов проекта Google, а не ошибка формата ключа. Ранее Gemini API проекта уже вернул `402`, поэтому доступность Google-версии зависит от текущего состояния проекта.
 
 ## Синтез реплик
 
-Шаблон использует голос `Kore`. На каждую реплику отправляется отдельный запрос, чтобы монтаж и замена дубля не затрагивали весь эпизод. В `voiceName` укажи голос Gemini, а необязательный `delivery` задаёт короткую инструкцию по подаче, например «тихо и с тревогой».
+На каждую реплику отправляется отдельный запрос, чтобы замена одной реплики не затрагивала весь эпизод. Полный текст, роль персонажа и подача заданы в `src/episodes/episode-001-voice.json`.
 
-Gemini возвращает PCM-аудио; скрипт добавляет WAV-заголовок, сохраняет `.wav` в `public/audio/<episode-id>/` и прописывает путь в `audioFile` эпизода. Remotion воспроизводит этот файл через `<Audio>`.
+Аудио сохраняется отдельными MP3 в `public/audio/episode-001/google/` и `public/audio/episode-001/elevenlabs/`. Remotion читает нужную папку по выбранной композиции. Оригинальные звуковые эффекты создаются скриптом и добавляются при рендере.
 
 ## Локальный запуск
 
-```bash
-cp .env.example .env
-# Добавь GEMINI_API_KEY в .env
-npm run tts -- --input src/episodes/episode-001.json
-```
-
-Для короткой проверки можно создать один файл:
-
-```bash
-GEMINI_API_KEY='...' npm run tts -- --text 'Проверка озвучки.' --out out/voice-smoke.wav
-```
+Локально вызови `node scripts/generate-voice-variants.mjs --provider=google` и/или `--provider=elevenlabs` после настройки локальных переменных.
 
 Сгенерированные аудиофайлы исключены из Git. Не сохраняй реальный ключ в shell history; предпочтительнее использовать локальный `.env` или менеджер секретов.
 

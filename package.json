@@ -7,7 +7,7 @@
     "studio": "remotion studio src/index.tsx",
     "render": "remotion render src/index.tsx",
     "validate": "node scripts/validate-episode.mjs",
-    "tts": "node scripts/google-tts.mjs",
+    "tts": "node scripts/generate-voice-variants.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

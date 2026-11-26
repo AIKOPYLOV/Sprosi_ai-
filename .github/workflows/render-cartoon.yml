@@ -1,0 +1,60 @@
+name: Render 2D cartoon voice variants
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  google-tts:
+    name: Gemini TTS version
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Generate Gemini voice clips
+        env:
+          SPROSI_AI_OZVUCHKA: ${{ secrets.SPROSI_AI_OZVUCHKA }}
+        run: node scripts/generate-voice-variants.mjs --provider=google
+      - run: node scripts/create-sound-effects.mjs
+      - run: npx remotion browser ensure
+      - name: Render video
+        run: npx remotion render src/index.tsx SprosiAcademyPromoGoogle out/sprosi-ai-google-tts.mp4 --codec=h264 --crf=21 --concurrency=2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sprosi-ai-google-tts
+          path: out/sprosi-ai-google-tts.mp4
+          if-no-files-found: error
+          compression-level: 0
+
+  elevenlabs:
+    name: ElevenLabs version
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Generate ElevenLabs voice clips
+        env:
+          ELEVEN_LABS9: ${{ secrets.ELEVEN_LABS9 }}
+        run: node scripts/generate-voice-variants.mjs --provider=elevenlabs
+      - run: node scripts/create-sound-effects.mjs
+      - run: npx remotion browser ensure
+      - name: Render video
+        run: npx remotion render src/index.tsx SprosiAcademyPromoElevenLabs out/sprosi-ai-elevenlabs.mp4 --codec=h264 --crf=21 --concurrency=2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sprosi-ai-elevenlabs
+          path: out/sprosi-ai-elevenlabs.mp4
+          if-no-files-found: error
+          compression-level: 0
