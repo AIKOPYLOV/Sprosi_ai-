@@ -46,5 +46,5 @@ Studio откроет черновую раскадровку `StoryboardAnimati
 npm run tts -- --input src/episodes/episode-001.json
 ```
 
-В GitHub Actions секрет уже добавлен под именем `SPROSI_AI_OZVUCHKA`. Чтобы проверить его: **Actions → Google TTS smoke test → Run workflow**. Если API key действителен, в логе будет успех, а MP3 появится в артефакте `google-tts-smoke`. Workflow не печатает значение секрета.
+В GitHub Actions секрет уже добавлен под именем `SPROSI_AI_OZVUCHKA`. Сейчас проверка показала, что в нём пока не service-account JSON. После замены содержимого на JSON-ключ запусти **Actions → Google TTS smoke test → Run workflow**. Успешный вызов создаст MP3-артефакт `google-tts-smoke`; workflow не печатает значение секрета.
 
