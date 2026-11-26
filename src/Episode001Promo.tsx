@@ -52,10 +52,11 @@ const Hero: FC<{frame: number; emotion?: 'scared'|'thinking'|'relieved'|'happy';
   return <div style={{position:'absolute',left:`calc(50% + ${x}px)`,bottom:95,width:670,height:1120,transform:`translateX(-50%) scale(${scale}) translateY(${bob}px)`,transformOrigin:'bottom center'}}>
     <svg viewBox="0 0 670 1120" width="100%" height="100%" style={{overflow:'visible'}}>
       <ellipse cx="335" cy="1090" rx="245" ry="30" fill="#141720" opacity=".5"/>
-      <path d="M148 1090 Q150 866 214 813 L272 786 H398 L458 813 Q522 862 524 1090Z" fill="#3d6a83" stroke="#171b22" strokeWidth="19"/>
-      <path d="M279 797 L335 862 393 797" fill="#f1e6d5" stroke="#171b22" strokeWidth="12"/>
+      <path d="M148 1090 Q150 812 214 754 L272 726 H398 L458 754 Q522 812 524 1090Z" fill="#3d6a83" stroke="#171b22" strokeWidth="19"/>
+      <path d="M279 730 L335 798 393 730" fill="#f1e6d5" stroke="#171b22" strokeWidth="12"/>
       <path d="M169 918 Q77 867 105 799 Q127 750 164 790 L235 850" fill="#d9a77e" stroke="#171b22" strokeWidth="20" transform={`rotate(${Math.sin(frame/8)*8} 170 880)`}/>
       <path d="M501 920 Q591 854 565 798 Q544 754 511 795 L442 852" fill="#d9a77e" stroke="#171b22" strokeWidth="20" transform={`rotate(${-Math.sin(frame/8)*8} 500 880)`}/>
+      <path d="M288 620 Q335 658 382 620 C367 665 370 690 386 726 Q335 754 284 726 C300 690 303 665 288 620Z" fill="#edc29c" stroke="#171b22" strokeWidth="17"/>
       <path d="M221 425 Q181 315 226 235 Q263 150 344 156 Q443 148 477 245 Q515 342 466 442Z" fill="#45332d" stroke="#171b22" strokeWidth="19"/>
       <ellipse cx="335" cy="479" rx="177" ry="202" fill="#edc29c" stroke="#171b22" strokeWidth="19"/>
       <path d="M166 424 Q192 222 351 208 Q450 216 501 366 Q417 306 333 318 Q242 324 166 424Z" fill="#45332d" stroke="#171b22" strokeWidth="18"/>
