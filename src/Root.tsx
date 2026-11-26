@@ -3,6 +3,7 @@ import {Composition} from 'remotion';
 import template from './episodes/template.json';
 import {StoryboardAnimatic} from './StoryboardAnimatic';
 import {PromoCompositions} from './Episode001Promo';
+import {Episode002Composition} from './Episode002Promo';
 import type {Episode} from './episode-types';
 
 export const RemotionRoot: FC = () => (
@@ -17,6 +18,7 @@ export const RemotionRoot: FC = () => (
       defaultProps={{episode: template as Episode}}
     />
     <PromoCompositions />
+    <Episode002Composition />
   </>
 );
 

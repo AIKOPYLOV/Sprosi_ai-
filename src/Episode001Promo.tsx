@@ -24,7 +24,7 @@ const script = voiceScript.lines;
 
 const clamp = {extrapolateLeft: 'clamp' as const, extrapolateRight: 'clamp' as const};
 
-const Room: FC<{frame: number; night?: boolean}> = ({frame, night = false}) => {
+export const Room: FC<{frame: number; night?: boolean}> = ({frame, night = false}) => {
   const glow = 0.31 + Math.sin(frame / 48) * 0.018;
   const wheelTurn = frame * 0.42;
   const dust = [
@@ -116,7 +116,7 @@ const Room: FC<{frame: number; night?: boolean}> = ({frame, night = false}) => {
   </svg>;
 };
 
-const Hero: FC<{frame: number; emotion?: 'scared'|'thinking'|'relieved'|'happy'; x?: number; scale?: number; speaking?:boolean}> = ({frame, emotion='scared', x=0, scale=1, speaking=false}) => {
+export const Hero: FC<{frame: number; emotion?: 'scared'|'thinking'|'relieved'|'happy'; x?: number; scale?: number; speaking?:boolean}> = ({frame, emotion='scared', x=0, scale=1, speaking=false}) => {
   const blink = (frame % 103 > 96 && frame % 103 < 100) ? .12 : 1;
   const bob = Math.sin(frame / 24) * (emotion === 'scared' ? 3 : 1.5);
   const talking = speaking && Math.floor(frame / 8) % 2 === 0;
@@ -143,7 +143,7 @@ const Hero: FC<{frame: number; emotion?: 'scared'|'thinking'|'relieved'|'happy';
   </div>;
 };
 
-const Mug: FC<{frame:number; x?:number; y?:number; tilt?:number; generic?:boolean}> = ({frame,x=0,y=0,tilt=0,generic=false}) => {
+export const Mug: FC<{frame:number; x?:number; y?:number; tilt?:number; generic?:boolean}> = ({frame,x=0,y=0,tilt=0,generic=false}) => {
   const wobble = Math.sin(frame/38)*0.7;
   return <svg viewBox="0 0 300 320" style={{position:'absolute',width:300,height:320,left:`calc(50% + ${x}px)`,top:y,transform:`translateX(-50%) rotate(${tilt+wobble}deg)`,filter:'drop-shadow(0 18px 10px #1118)'}}>
     <path d="M196 83 Q285 65 274 145 Q266 203 206 193" fill="none" stroke="#181d24" strokeWidth="25"/>
@@ -155,7 +155,7 @@ const Mug: FC<{frame:number; x?:number; y?:number; tilt?:number; generic?:boolea
   </svg>;
 };
 
-const Phone: FC<{frame:number; message:string; tilt?:number}> = ({frame,message,tilt=0}) => {
+export const Phone: FC<{frame:number; message:string; tilt?:number}> = ({frame,message,tilt=0}) => {
   const pop = interpolate(frame%150,[0,12],[.5,1],{...clamp,easing:Easing.out(Easing.cubic)});
   return <div style={{position:'absolute',right:80,top:390,width:310,height:560,borderRadius:48,border:'13px solid #131923',background:'#e9e7df',transform:`rotate(${tilt}deg) scale(${pop})`,boxShadow:'0 26px 50px #080b11aa',padding:22,boxSizing:'border-box'}}>
     <div style={{height:8,width:88,borderRadius:8,background:'#222833',margin:'0 auto 30px'}}/><div style={{font:'700 22px Arial',color:'#515766'}}>СЕГОДНЯ · 09:41</div>
