@@ -44,7 +44,7 @@
 ## Озвучка и звук
 
 - Используй **Google Cloud Text-to-Speech**. ElevenLabs не использовать.
-- Локальный ключ бери из `GOOGLE_TTS_API_KEY`; в GitHub Actions — из секрета `SPROSI_AI_OZVUCHKA`.
+- Локально используй Google Cloud service-account JSON через `GOOGLE_APPLICATION_CREDENTIALS`; в GitHub Actions он хранится в секрете `SPROSI_AI_OZVUCHKA`.
 - Никогда не показывай ключ, не включай его в файлы или логи и не запрашивай его в чате.
 - Генерируй реплики раздельными файлами, чтобы было легко менять темп, паузы и монтаж.
 - Проставляй голос персонажу один раз в данных эпизода; сохраняй его от сцены к сцене.

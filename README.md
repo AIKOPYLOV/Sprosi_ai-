@@ -40,7 +40,7 @@ Studio откроет черновую раскадровку `StoryboardAnimati
 
 ## Google TTS
 
-Локально скопируйте `.env.example` в `.env` и положите Google Cloud TTS API key в `GOOGLE_TTS_API_KEY`. Не коммитьте `.env` и сгенерированные аудиофайлы.
+Локально скопируйте `.env.example` в `.env` и укажите путь к JSON service-account key в `GOOGLE_APPLICATION_CREDENTIALS`. В GitHub secret `SPROSI_AI_OZVUCHKA` должен храниться этот JSON, а не обычный API key: Google Cloud Text-to-Speech требует OAuth2.
 
 ```bash
 npm run tts -- --input src/episodes/episode-001.json
