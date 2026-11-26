@@ -24,7 +24,7 @@ try {
       if (!Number.isFinite(beat.durationSeconds) || beat.durationSeconds <= 0) errors.push(`${prefix}: durationSeconds должен быть больше нуля.`);
       if (!Array.isArray(beat.dialogue) || !Array.isArray(beat.sound)) errors.push(`${prefix}: dialogue и sound должны быть массивами.`);
       for (const line of beat.dialogue ?? []) {
-        if (!line.id || !line.characterId || !line.text || !line.voiceName || !line.languageCode) errors.push(`${prefix}: у реплики обязательны id, characterId, text, voiceName и languageCode.`);
+        if (!line.id || !line.characterId || !line.text || !line.voiceName) errors.push(`${prefix}: у реплики обязательны id, characterId, text и voiceName.`);
         if (/\[[^\]]+\]/.test(line.text ?? '')) errors.push(`${prefix}: замени шаблонный текст реплики «${line.id ?? '?'}».`);
       }
       if (beat.arc === 'conflict' && (!beat.choice?.optionA || !beat.choice?.riskA || !beat.choice?.optionB || !beat.choice?.riskB)) errors.push('В этапе conflict укажи два решения и риск каждого.');

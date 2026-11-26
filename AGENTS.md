@@ -43,8 +43,8 @@
 
 ## Озвучка и звук
 
-- Используй **Google Cloud Text-to-Speech**. ElevenLabs не использовать.
-- Локально используй Google Cloud service-account JSON через `GOOGLE_APPLICATION_CREDENTIALS`; в GitHub Actions он хранится в секрете `SPROSI_AI_OZVUCHKA`. Для разового теста допустим краткоживущий OAuth access token; обычный API key не подходит.
+- Используй **Gemini TTS через Gemini API**. ElevenLabs и Google Cloud Text-to-Speech не использовать.
+- Локальный ключ бери из `GEMINI_API_KEY`; в GitHub Actions он хранится в секрете `SPROSI_AI_OZVUCHKA`.
 - Никогда не показывай ключ, не включай его в файлы или логи и не запрашивай его в чате.
 - Генерируй реплики раздельными файлами, чтобы было легко менять темп, паузы и монтаж.
 - Проставляй голос персонажу один раз в данных эпизода; сохраняй его от сцены к сцене.

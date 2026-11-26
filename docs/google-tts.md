@@ -1,35 +1,38 @@
-# Google Cloud Text-to-Speech
+# Gemini TTS через Gemini API
 
-## Секрет и безопасность
+## Ключ
 
-В GitHub Actions секрет ожидается под точным именем `SPROSI_AI_OZVUCHKA`. Он может содержать JSON-ключ Google Cloud service account или временный OAuth2 access token. Проверочный запуск показал, что Cloud Text-to-Speech отклоняет API-key authentication и ожидает OAuth2. Для service account скрипт подписывает JWT и получает краткоживущий OAuth access token; обычный OAuth access token передаётся как Bearer token. Секреты и токены не выводятся.
+Для озвучки используется Gemini API key из Google AI Studio. Локально сохрани его как `GEMINI_API_KEY` в `.env`. Для GitHub Actions секрет называется `SPROSI_AI_OZVUCHKA`. Не коммить ключ, не печатай его и не помещай в workflow inputs.
 
-Локально укажи путь к JSON-файлу в `GOOGLE_APPLICATION_CREDENTIALS`. Этот файл не добавляй в Git. Service account должен иметь доступ к проекту Google Cloud, включённый Cloud Text-to-Speech API и право на синтез речи; настройки проекта и биллинг должны быть активны.
+Обычный Google Cloud Text-to-Speech API key и service-account JSON не используются этим скриптом. Запрос идёт к модели `gemini-2.5-flash-preview-tts`; ключ передаётся через заголовок `x-goog-api-key`.
 
-## Проверка ключа в Actions
+## Проверка в GitHub Actions
 
-1. Убедись, что `SPROSI_AI_OZVUCHKA` содержит либо JSON с `type`, `client_email` и `private_key`, либо краткоживущий OAuth2 access token.
-2. Открой вкладку **Actions** и выбери **Google TTS smoke test**.
-3. Нажми **Run workflow** и оставь короткую фразу на русском.
-4. Успешный job и артефакт `google-tts-smoke` означают, что авторизация и вызов TTS прошли.
-5. Если шаг упал, проверь OAuth token или service-account JSON, доступ к проекту, включённый API, роль service account и billing. Не добавляй credential в workflow-файл или команду.
+1. В `SPROSI_AI_OZVUCHKA` должен быть Gemini API key из AI Studio.
+2. Открой **Actions → Gemini TTS smoke test → Run workflow**.
+3. После успешного вызова скачай артефакт `google-tts-smoke` и прослушай его.
 
-Тест вручную запускается в GitHub; при каждом push API не вызывается. Это ограничивает случайные вызовы и расходы.
+Ключ может быть валидным, но синтез всё равно не пройдёт без доступных Gemini API credits/billing. Ошибка `402` означает, что кредиты проекта закончились или не настроена предоплата.
 
-## Голоса
+## Синтез реплик
 
-Шаблон использует имя `ru-RU-Standard-A` с языком `ru-RU` и умеренным темпом. Перед записью выбери голос для каждого персонажа, прослушай пробу и сохрани голос во всех репликах персонажа. Если меняется голос/семейство модели, проверь его в Google Cloud Text-to-Speech voices list.
+Шаблон использует голос `Kore`. На каждую реплику отправляется отдельный запрос, чтобы монтаж и замена дубля не затрагивали весь эпизод. В `voiceName` укажи голос Gemini, а необязательный `delivery` задаёт короткую инструкцию по подаче, например «тихо и с тревогой».
 
-Параметры реплики: `voiceName`, `languageCode`, `speakingRate` и `pitch`. Делай отдельный аудиофайл на каждую реплику, чтобы можно было менять монтаж без повторной генерации всего эпизода. Для протяжённых пауз и сложной интонации редактируй аудио/тайминг после синтеза; не рассчитывай, что TTS сам сыграет эмоциональный подтекст.
+Gemini возвращает PCM-аудио; скрипт добавляет WAV-заголовок, сохраняет `.wav` в `public/audio/<episode-id>/` и прописывает путь в `audioFile` эпизода. Remotion воспроизводит этот файл через `<Audio>`.
 
-## Локальный вызов
+## Локальный запуск
 
 ```bash
 cp .env.example .env
-# Предпочтительно: GOOGLE_APPLICATION_CREDENTIALS=/путь/к/service-account.json в .env
-# Только для временного теста можно задать GOOGLE_TTS_ACCESS_TOKEN в .env
+# Добавь GEMINI_API_KEY в .env
 npm run tts -- --input src/episodes/episode-001.json
 ```
 
-Краткоживущий access token годится для разовой проверки и может быстро истечь; для регулярной работы используй service-account JSON. Сгенерированные MP3 сохраняются в `public/audio/<episode-id>/` и исключены из Git.
+Для короткой проверки можно создать один файл:
+
+```bash
+GEMINI_API_KEY='...' npm run tts -- --text 'Проверка озвучки.' --out out/voice-smoke.wav
+```
+
+Сгенерированные аудиофайлы исключены из Git. Не сохраняй реальный ключ в shell history; предпочтительнее использовать локальный `.env` или менеджер секретов.
 

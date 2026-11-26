@@ -5,9 +5,7 @@ export type DialogueLine = {
   characterId: string;
   text: string;
   voiceName: string;
-  languageCode: string;
-  speakingRate?: number;
-  pitch?: number;
+  delivery?: string;
   offsetSeconds?: number;
   audioFile?: string;
 };

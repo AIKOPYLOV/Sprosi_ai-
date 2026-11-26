@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
-import {createSign} from 'node:crypto';
 
 function arg(name, fallback) {
   const index = process.argv.indexOf(name);
@@ -13,85 +12,106 @@ try {
   for (const line of envFile.split(/\r?\n/)) {
     const match = line.trim().match(/^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/);
     if (!match || process.env[match[1]] !== undefined) continue;
-    const rawValue = match[2].trim();
-    const quote = rawValue[0];
-    const quoted = rawValue.length >= 2 && (quote === '"' || quote === "'") && rawValue.at(-1) === quote;
-    process.env[match[1]] = quoted ? rawValue.slice(1, -1) : rawValue;
+    const value = match[2].trim();
+    const quote = value[0];
+    const isQuoted = value.length >= 2 && (quote === '"' || quote === "'") && value.at(-1) === quote;
+    process.env[match[1]] = isQuoted ? value.slice(1, -1) : value;
   }
 } catch (error) {
   if (error.code !== 'ENOENT') throw error;
 }
 
+const apiKey = process.env.GEMINI_API_KEY || process.env.SPROSI_AI_OZVUCHKA;
+const model = process.env.GEMINI_TTS_MODEL || 'gemini-2.5-flash-preview-tts';
 const singleText = arg('--text');
 const inputPath = arg('--input', 'src/episodes/template.json');
-const singleOutput = arg('--out', 'out/voice-smoke.mp3');
-let cachedAccessToken;
+const singleOutput = arg('--out', 'out/voice-smoke.wav');
 
-async function getAccessToken() {
-  if (cachedAccessToken) return cachedAccessToken;
-  const directToken = process.env.GOOGLE_TTS_ACCESS_TOKEN?.trim();
-  if (directToken) return directToken;
-  const inlineCredentials = (process.env.GOOGLE_TTS_CREDENTIALS || process.env.SPROSI_AI_OZVUCHKA)?.trim();
-  const credentialsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-  if (inlineCredentials && !inlineCredentials.startsWith('{')) return inlineCredentials;
-  let account;
-  if (inlineCredentials) account = JSON.parse(inlineCredentials);
-  else if (credentialsPath) account = JSON.parse(await fs.readFile(credentialsPath, 'utf8'));
-  else throw new Error('Не найдены Google Cloud credentials. Задай GOOGLE_APPLICATION_CREDENTIALS, GOOGLE_TTS_ACCESS_TOKEN или JSON service account в SPROSI_AI_OZVUCHKA.');
-  if (account.type !== 'service_account' || !account.client_email || !account.private_key) {
-    throw new Error('JSON credential должен быть ключом service account с полями type, client_email и private_key.');
-  }
-  const now = Math.floor(Date.now() / 1000);
-  const encode = (value) => Buffer.from(JSON.stringify(value)).toString('base64url');
-  const unsigned = `${encode({alg:'RS256',typ:'JWT'})}.${encode({iss:account.client_email,scope:'https://www.googleapis.com/auth/cloud-platform',aud:'https://oauth2.googleapis.com/token',iat:now,exp:now+3600})}`;
-  const signer = createSign('RSA-SHA256');
-  signer.update(unsigned);
-  const assertion = `${unsigned}.${signer.sign(account.private_key,'base64url')}`;
-  const response = await fetch('https://oauth2.googleapis.com/token', {
-    method:'POST',
-    headers:{'Content-Type':'application/x-www-form-urlencoded'},
-    body:new URLSearchParams({grant_type:'urn:ietf:params:oauth:grant-type:jwt-bearer',assertion}),
-  });
-  const result = await response.json().catch(() => ({}));
-  if (!response.ok || !result.access_token) throw new Error(`Google OAuth token request failed (HTTP ${response.status}). Check the service-account JSON and project configuration.`);
-  cachedAccessToken = result.access_token;
-  return cachedAccessToken;
+if (!apiKey) {
+  console.error('Не найден Gemini API key. Локально задай GEMINI_API_KEY; в GitHub Actions используй secret SPROSI_AI_OZVUCHKA.');
+  process.exit(1);
 }
 
-async function synthesize(text, voiceName = 'ru-RU-Standard-A', languageCode = 'ru-RU', speakingRate = 0.96, pitch = 0) {
+function pcmToWav(pcm, sampleRate = 24000, channels = 1, bitsPerSample = 16) {
+  const header = Buffer.alloc(44);
+  const byteRate = sampleRate * channels * bitsPerSample / 8;
+  const blockAlign = channels * bitsPerSample / 8;
+  header.write('RIFF', 0);
+  header.writeUInt32LE(36 + pcm.length, 4);
+  header.write('WAVE', 8);
+  header.write('fmt ', 12);
+  header.writeUInt32LE(16, 16);
+  header.writeUInt16LE(1, 20);
+  header.writeUInt16LE(channels, 22);
+  header.writeUInt32LE(sampleRate, 24);
+  header.writeUInt32LE(byteRate, 28);
+  header.writeUInt16LE(blockAlign, 32);
+  header.writeUInt16LE(bitsPerSample, 34);
+  header.write('data', 36);
+  header.writeUInt32LE(pcm.length, 40);
+  return Buffer.concat([header, pcm]);
+}
+
+function audioFromResponse(result) {
+  const parts = result?.candidates?.[0]?.content?.parts ?? [];
+  const part = parts.find((item) => item.inlineData?.data || item.inline_data?.data);
+  const data = part?.inlineData ?? part?.inline_data;
+  if (!data?.data) throw new Error('Gemini TTS не вернул аудио.');
+  const mimeType = data.mimeType ?? data.mime_type ?? 'audio/pcm;rate=24000';
+  const bytes = Buffer.from(data.data, 'base64');
+  if (mimeType.includes('pcm') || mimeType.includes('L16')) {
+    const rate = Number(mimeType.match(/rate=(\d+)/)?.[1] ?? 24000);
+    return {bytes: pcmToWav(bytes, rate), extension: 'wav'};
+  }
+  if (mimeType.includes('wav') || mimeType.includes('wave')) return {bytes, extension: 'wav'};
+  if (mimeType.includes('mpeg') || mimeType.includes('mp3')) return {bytes, extension: 'mp3'};
+  throw new Error(`Неизвестный формат аудио от Gemini: ${mimeType}`);
+}
+
+async function synthesize(text, voiceName = 'Kore', delivery = '') {
   if (!text?.trim()) throw new Error('Текст реплики пустой.');
-  const accessToken = await getAccessToken();
-  const response = await fetch('https://texttospeech.googleapis.com/v1/text:synthesize', {
+  const prompt = delivery ? `${delivery}\n${text}` : text;
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
     method: 'POST',
-    headers: {'Content-Type': 'application/json',Authorization:`Bearer ${accessToken}`},
-    body: JSON.stringify({input:{text},voice:{languageCode,name:voiceName},audioConfig:{audioEncoding:'MP3',speakingRate,pitch}}),
+    headers: {'Content-Type': 'application/json', 'x-goog-api-key': apiKey},
+    body: JSON.stringify({
+      contents: [{parts: [{text: prompt}]}],
+      generationConfig: {
+        responseModalities: ['AUDIO'],
+        speechConfig: {voiceConfig: {prebuiltVoiceConfig: {voiceName}}},
+      },
+    }),
   });
   const result = await response.json().catch(() => ({}));
-  if (!response.ok || !result.audioContent) {
-    const message = String(result?.error?.message ?? `HTTP ${response.status}`).replaceAll(accessToken, '[REDACTED]');
-    throw new Error(`Google TTS вернул ошибку: ${message}`);
+  if (!response.ok) {
+    throw new Error(`Gemini TTS вернул HTTP ${response.status}: ${result?.error?.message ?? 'ошибка API'}`);
   }
-  return Buffer.from(result.audioContent, 'base64');
+  return audioFromResponse(result);
+}
+
+async function writeAudio(basePath, audio) {
+  const outputPath = basePath.replace(/\.(wav|mp3|pcm)$/i, '') + `.${audio.extension}`;
+  await fs.mkdir(path.dirname(path.resolve(outputPath)), {recursive: true});
+  await fs.writeFile(outputPath, audio.bytes);
+  return outputPath;
 }
 
 try {
   if (singleText) {
     const audio = await synthesize(singleText);
-    await fs.mkdir(path.dirname(path.resolve(singleOutput)), {recursive:true});
-    await fs.writeFile(singleOutput, audio);
-    console.log(`Озвучка создана: ${singleOutput}`);
+    const outputPath = await writeAudio(singleOutput, audio);
+    console.log(`Озвучка создана: ${outputPath}`);
   } else {
     const episode = JSON.parse(await fs.readFile(inputPath, 'utf8'));
     const lines = (episode.beats ?? []).flatMap((beat) => beat.dialogue ?? []);
     if (lines.length === 0) throw new Error('В эпизоде нет реплик в beats[].dialogue[].');
     const base = path.join('public', 'audio', episode.id);
-    await fs.mkdir(base, {recursive:true});
+    await fs.mkdir(base, {recursive: true});
     for (const line of lines) {
       if (/\[[^\]]+\]/.test(line.text)) throw new Error(`Сначала замени шаблонную реплику: ${line.id}`);
-      const audio = await synthesize(line.text, line.voiceName, line.languageCode, line.speakingRate ?? 0.96, line.pitch ?? 0);
-      const filename = `${line.id}.mp3`;
-      await fs.writeFile(path.join(base, filename), audio);
-      line.audioFile = `audio/${episode.id}/${filename}`;
+      const audio = await synthesize(line.text, line.voiceName, line.delivery ?? '');
+      const outputPath = await writeAudio(path.join(base, line.id), audio);
+      line.audioFile = path.relative('public', outputPath).split(path.sep).join('/');
       console.log(`Создана реплика ${line.id}`);
     }
     await fs.writeFile(inputPath, `${JSON.stringify(episode, null, 2)}\n`);

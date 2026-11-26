@@ -1,6 +1,6 @@
 # Спроси AI — 2D-мультфильмы
 
-Рабочая база для разработки коротких 2D-историй и вертикальных роликов для Reels. В репозитории собраны драматургическая схема из материалов проекта, визуальные правила, шаблон раскадровки, Remotion-композиция и озвучка через Google Cloud Text-to-Speech.
+Рабочая база для разработки коротких 2D-историй и вертикальных роликов для Reels. В репозитории собраны драматургическая схема из материалов проекта, визуальные правила, шаблон раскадровки, Remotion-композиция и озвучка через Gemini TTS.
 
 ## Что здесь есть
 
@@ -8,12 +8,12 @@
 - `docs/story-structure.md` — хук, рост напряжения, конфликт, возвращение, повторный рост и развязка; схема сценария и удержания из PDF.
 - `docs/visual-style.md` — художественное направление и правила непрерывности персонажей.
 - `docs/production-workflow.md` — процесс от идеи до вертикального MP4.
-- `docs/google-tts.md` — настройки Google TTS; секрет GitHub Actions ожидается под именем `SPROSI_AI_OZVUCHKA`.
+- `docs/google-tts.md` — настройки Gemini TTS; секрет GitHub Actions ожидается под именем `SPROSI_AI_OZVUCHKA`.
 - `src/episodes/template.json` — структурированный шаблон эпизода и планов.
 - `src/StoryboardAnimatic.tsx` — черновая вертикальная композиция для проверки ритма и длины сцен до финальной иллюстрации.
 - `scripts/validate-episode.mjs` — проверка структуры сценария.
-- `scripts/google-tts.mjs` — генерация отдельных MP3-файлов для реплик.
-- `.github/workflows/google-tts-smoke.yml` — ручная проверка секрета через короткий вызов Google TTS без вывода ключа в логи.
+- `scripts/google-tts.mjs` — генерация отдельных WAV-файлов для реплик через Gemini TTS.
+- `.github/workflows/google-tts-smoke.yml` — ручная проверка Gemini API key без вывода ключа в логи.
 
 ## Быстрый старт
 
@@ -38,13 +38,13 @@ Studio откроет черновую раскадровку `StoryboardAnimati
 
 Подробности и критерии качества — в `docs/` и `AGENTS.md`.
 
-## Google TTS
+## Gemini TTS
 
-Локально скопируйте `.env.example` в `.env` и укажите путь к JSON service-account key в `GOOGLE_APPLICATION_CREDENTIALS`. Для разового smoke test GitHub secret `SPROSI_AI_OZVUCHKA` может содержать OAuth2 access token. Обычный API key Google Cloud Text-to-Speech не принимает.
+Локально скопируйте `.env.example` в `.env` и укажите Gemini API key в `GEMINI_API_KEY`. В GitHub Actions ключ хранится в секрете `SPROSI_AI_OZVUCHKA`.
 
 ```bash
 npm run tts -- --input src/episodes/episode-001.json
 ```
 
-В GitHub Actions секрет уже добавлен под именем `SPROSI_AI_OZVUCHKA`. Сейчас проверка показала, что в нём пока не service-account JSON. После замены содержимого на JSON-ключ запусти **Actions → Google TTS smoke test → Run workflow**. Успешный вызов создаст MP3-артефакт `google-tts-smoke`; workflow не печатает значение секрета.
+Запусти **Actions → Gemini TTS smoke test → Run workflow**. Успешный вызов создаст WAV-артефакт `google-tts-smoke`; workflow не печатает значение секрета.
 
