@@ -119,7 +119,7 @@ export const Room: FC<{frame: number; night?: boolean}> = ({frame, night = false
 export const Hero: FC<{frame: number; emotion?: 'scared'|'thinking'|'relieved'|'happy'; x?: number; scale?: number; speaking?:boolean}> = ({frame, emotion='scared', x=0, scale=1, speaking=false}) => {
   const blink = (frame % 103 > 96 && frame % 103 < 100) ? .12 : 1;
   const bob = Math.sin(frame / 24) * (emotion === 'scared' ? 3 : 1.5);
-  const talking = speaking && Math.floor(frame / 8) % 2 === 0;
+  const talking = speaking && Math.floor(frame / 5) % 2 === 0;
   const mouth = talking ? 'M314 558 Q335 546 356 558 Q365 575 335 587 Q305 575 314 558' : emotion === 'scared' ? 'M314 558 Q335 545 356 558 Q364 595 335 614 Q306 595 314 558' : emotion === 'happy' ? 'M284 554 Q335 607 386 554 Q335 641 284 554' : emotion === 'relieved' ? 'M292 569 Q335 595 378 569' : 'M295 570 Q335 552 375 570';
   const eyes = emotion === 'scared' || emotion === 'thinking' ? 50 : 42;
   return <div style={{position:'absolute',left:`calc(50% + ${x}px)`,bottom:95,width:670,height:1120,transform:`translateX(-50%) scale(${scale}) translateY(${bob}px)`,transformOrigin:'bottom center'}}>

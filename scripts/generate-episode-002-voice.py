@@ -26,7 +26,8 @@ async def main() -> None:
                 await edge_tts.Communicate(
                     line["text"],
                     source["voice"],
-                    rate="+8%",
+                    rate=line.get("rate", "+12%"),
+                    pitch=line.get("pitch", "+1Hz"),
                     proxy=proxy,
                 ).save(str(destination))
                 if destination.stat().st_size > 1000:
