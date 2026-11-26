@@ -127,8 +127,8 @@ export const Hero: FC<{frame: number; emotion?: 'scared'|'thinking'|'relieved'|'
     <svg viewBox="0 0 670 1120" width="100%" height="100%" style={{overflow:'visible'}}>
       <ellipse cx="335" cy="1090" rx="245" ry="30" fill="#141720" opacity=".5"/>
       <path d="M148 1090 Q150 812 214 754 L272 726 H398 L458 754 Q522 812 524 1090Z" fill="#3d6a83" stroke="#171b22" strokeWidth="19"/>
-      <g transform={`rotate(${step*15} 283 1008)`}><path d="M245 985H326L320 1073L285 1084L250 1072Z" fill="#303947" stroke="#171b22" strokeWidth="12"/><path d="M254 1063Q275 1072 310 1064L317 1087H248Z" fill="#e5d9c8" stroke="#171b22" strokeWidth="11" strokeLinejoin="round"/></g>
-      <g transform={`rotate(${-step*15} 383 1008)`}><path d="M344 985H425L420 1072L385 1084L350 1073Z" fill="#303947" stroke="#171b22" strokeWidth="12"/><path d="M352 1064Q380 1073 411 1064L421 1087H347Z" fill="#e5d9c8" stroke="#171b22" strokeWidth="11" strokeLinejoin="round"/></g>
+      <g transform={`rotate(${step*27} 283 1008)`}><path d="M245 985H326L320 1073L285 1084L250 1072Z" fill="#303947" stroke="#171b22" strokeWidth="12"/><path d="M254 1063Q275 1072 310 1064L317 1087H248Z" fill="#e5d9c8" stroke="#171b22" strokeWidth="11" strokeLinejoin="round"/></g>
+      <g transform={`rotate(${-step*27} 383 1008)`}><path d="M344 985H425L420 1072L385 1084L350 1073Z" fill="#303947" stroke="#171b22" strokeWidth="12"/><path d="M352 1064Q380 1073 411 1064L421 1087H347Z" fill="#e5d9c8" stroke="#171b22" strokeWidth="11" strokeLinejoin="round"/></g>
       <path d="M279 730 L335 798 393 730" fill="#f1e6d5" stroke="#171b22" strokeWidth="12"/>
       <path d="M169 918 Q77 867 105 799 Q127 750 164 790 L235 850" fill="#d9a77e" stroke="#171b22" strokeWidth="20" transform={`rotate(${Math.sin(frame/28)*2 + step*10} 170 880)`}/>
       <path d="M501 920 Q591 854 565 798 Q544 754 511 795 L442 852" fill="#d9a77e" stroke="#171b22" strokeWidth="20" transform={`rotate(${-Math.sin(frame/28)*2 - step*10} 500 880)`}/>
@@ -146,13 +146,13 @@ export const Hero: FC<{frame: number; emotion?: 'scared'|'thinking'|'relieved'|'
   </div>;
 };
 
-export const Mug: FC<{frame:number; x?:number; y?:number; tilt?:number; generic?:boolean}> = ({frame,x=0,y=0,tilt=0,generic=false}) => {
+export const Mug: FC<{frame:number; x?:number; y?:number; tilt?:number; generic?:boolean; hiddenMark?:boolean}> = ({frame,x=0,y=0,tilt=0,generic=false,hiddenMark=false}) => {
   const wobble = Math.sin(frame/38)*0.7;
   return <svg viewBox="0 0 300 320" style={{position:'absolute',width:300,height:320,left:`calc(50% + ${x}px)`,top:y,transform:`translateX(-50%) rotate(${tilt+wobble}deg)`,filter:'drop-shadow(0 18px 10px #1118)'}}>
     <path d="M196 83 Q285 65 274 145 Q266 203 206 193" fill="none" stroke="#181d24" strokeWidth="25"/>
     <path d="M196 83 Q285 65 274 145 Q266 203 206 193" fill="none" stroke={generic?'#d6d0c7':'#d9a37e'} strokeWidth="17"/>
     <path d="M54 70 Q53 51 80 51 H203 Q224 52 221 82 L208 252 Q205 278 178 280 H95 Q68 279 65 251Z" fill={generic?'#b9bec8':'#e4b790'} stroke="#171b22" strokeWidth="17"/>
-    {!generic && <path d="M139 128 L148 146 L168 149 L153 163 L157 182 L139 172 L122 182 L125 163 L110 149 L130 146Z" fill="#33a69b" stroke="#17484a" strokeWidth="7"/>}
+    {!generic && !hiddenMark && <path d="M139 128 L148 146 L168 149 L153 163 L157 182 L139 172 L122 182 L125 163 L110 149 L130 146Z" fill="#33a69b" stroke="#17484a" strokeWidth="7"/>}
     {generic && <path d="M92 123 Q145 109 185 124" fill="none" stroke="#eff0ee" strokeWidth="10"/>}
     <ellipse cx="139" cy="75" rx="65" ry="17" fill="#fff8e9" stroke="#171b22" strokeWidth="9"/>
   </svg>;
