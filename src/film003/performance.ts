@@ -25,8 +25,8 @@ function region(x: number, y: number, cx: number, cy: number, rx: number, ry: nu
   return 1 - smooth(.48, 1, Math.hypot((x - cx) / rx, (y - cy) / ry));
 }
 
-// Patches live in the same drawing coordinates as the mesh. The eyes were traced
-// from the cel so that eyelids, pupils and mouth travel with a turning head.
+// Patches live in drawing coordinates. The face illustration stays still while
+// the shoulders and hands move. Only the small mouth patch follows the voice.
 function face(ctx: CanvasRenderingContext2D, cel: Cel, p: Performance) {
   for (const eye of model[cel].eyes) {
     const cols = eye.columns;
@@ -38,18 +38,8 @@ function face(ctx: CanvasRenderingContext2D, cel: Cel, p: Performance) {
     ctx.clip();
     ctx.fillStyle = '#191619';
     ctx.beginPath();
-    ctx.ellipse(eye.pupil[0] + p.gazeX, eye.pupil[1] + p.gazeY, eye.radius[0], eye.radius[1], .08, 0, 2 * Math.PI);
+    ctx.ellipse(eye.pupil[0], eye.pupil[1], eye.radius[0], eye.radius[1], .08, 0, 2 * Math.PI);
     ctx.fill();
-    if (p.lid > .005) {
-      const edge = (c: number[]) => c[1] - 3 + (c[2] - c[1] + 5) * p.lid;
-      ctx.beginPath();
-      ctx.moveTo(cols[0][0] - 3, 195);
-      for (const c of cols) ctx.lineTo(c[0],edge(c));
-      ctx.lineTo(cols[cols.length-1][0] + 2,195); ctx.closePath();
-      ctx.fillStyle = '#f3aa77'; ctx.fill();
-      ctx.beginPath(); cols.forEach((c,i) => i ? ctx.lineTo(c[0],edge(c)) : ctx.moveTo(c[0],edge(c)));
-      ctx.lineWidth = 3; ctx.strokeStyle = '#2c201c'; ctx.stroke();
-    }
     ctx.restore();
   }
   ctx.save();
@@ -57,7 +47,7 @@ function face(ctx: CanvasRenderingContext2D, cel: Cel, p: Performance) {
   ctx.translate(phone ? 462 : 513, phone ? 389 : 390);
   ctx.rotate(phone ? -.37 : -.21);
   const open = Math.max(0, p.mouth);
-  const width = (phone ? 30 : 29) * (1 - .34 * open * p.round);
+  const width = phone ? 30 : 29;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   ctx.lineWidth = 3.2;
@@ -66,7 +56,7 @@ function face(ctx: CanvasRenderingContext2D, cel: Cel, p: Performance) {
   if (open < .075) {
     ctx.moveTo(-width,2-p.smile*.3); ctx.quadraticCurveTo(1,-4+p.smile,width,-p.smile*.5); ctx.stroke();
   } else {
-    const height = 2.4 + open * (18 + 14 * p.round);
+    const height = 2.4 + open * 12;
     ctx.moveTo(-width,0);
     ctx.bezierCurveTo(-width*.6,-4,width*.64,-7,width,-2);
     ctx.bezierCurveTo(width*.68,height*1.12,-width*.54,height,-width,0);
@@ -75,10 +65,6 @@ function face(ctx: CanvasRenderingContext2D, cel: Cel, p: Performance) {
     ctx.fillStyle = '#f5dfba';
     ctx.beginPath(); ctx.moveTo(-width-3,-6); ctx.lineTo(width+4,-8);
     ctx.lineTo(width*.7,1.6); ctx.quadraticCurveTo(1,4,-width,1); ctx.fill();
-    if (height > 9) {
-      ctx.fillStyle = '#c76c65'; ctx.beginPath();
-      ctx.ellipse(3,height*.84,width*.57,height*.25,0,0,Math.PI*2); ctx.fill();
-    }
   }
   ctx.restore();
 }
@@ -164,12 +150,12 @@ export function buildRig(canvas: HTMLCanvasElement, image: HTMLImageElement, cel
   return {
     draw(p:Performance) {
       ink.clearRect(0,0,w,h); ink.drawImage(image,0,0); face(ink,cel,p);
-      const head=p.nod*rad, arm=p.lift*rad, hc=Math.cos(head)-1,hs=Math.sin(head),ac=Math.cos(arm)-1,as=Math.sin(arm);
+      const arm=p.lift*rad, ac=Math.cos(arm)-1,as=Math.sin(arm);
       for(let n=0;n<points.length;n++) {
-        const [x,y]=points[n], [body,skull,limb,tip,brow]=weights[n];
-        const hx=x-headPivot[0],hy=y-headPivot[1], ax=x-handPivot[0],ay=y-handPivot[1];
-        const dx=p.lean*body + skull*(hc*hx-hs*hy) + limb*(ac*ax-as*ay+p.reach);
-        const dy=p.lean*.11*body + skull*(hs*hx+hc*hy) + limb*(as*ax+ac*ay) + tip*p.wrist + brow*p.brow*.28;
+        const [x,y]=points[n], [body,,limb,tip]=weights[n];
+        const ax=x-handPivot[0],ay=y-handPivot[1];
+        const dx=p.lean*body + limb*(ac*ax-as*ay+p.reach);
+        const dy=p.lean*.11*body + limb*(as*ax+ac*ay) + tip*p.wrist;
         xy[2*n]=(x+dx+pad)/W; xy[2*n+1]=(y+dy+pad)/H;
       }
       paint();
