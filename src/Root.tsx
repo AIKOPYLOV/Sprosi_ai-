@@ -5,6 +5,8 @@ import {StoryboardAnimatic} from './StoryboardAnimatic';
 import {PromoCompositions} from './Episode001Promo';
 import {Episode002Composition} from './Episode002Promo';
 import {Pixel32DemoComposition} from './Pixel32Demo';
+import {ReferenceCartoonDemoComposition} from './ReferenceCartoonDemo';
+import {FilmCompositions} from './film003/Film';
 import type {Episode} from './episode-types';
 
 export const RemotionRoot: FC = () => (
@@ -21,6 +23,8 @@ export const RemotionRoot: FC = () => (
     <PromoCompositions />
     <Episode002Composition />
     <Pixel32DemoComposition />
+    <ReferenceCartoonDemoComposition />
+    <FilmCompositions />
   </>
 );
 
