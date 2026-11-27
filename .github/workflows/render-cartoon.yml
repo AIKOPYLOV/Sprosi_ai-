@@ -2,12 +2,21 @@ name: Render 2D cartoon voice variants
 
 on:
   workflow_dispatch:
+    inputs:
+      episode:
+        description: "Материалы для выпуска"
+        type: choice
+        default: episode-002
+        options:
+          - episode-002
+          - episode-003-voices
 
 permissions:
   contents: read
 
 jobs:
   gemini-tts:
+    if: inputs.episode != 'episode-003-voices'
     name: Gemini TTS version
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -34,6 +43,7 @@ jobs:
           compression-level: 0
 
   elevenlabs:
+    if: inputs.episode != 'episode-003-voices'
     name: ElevenLabs version
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -59,3 +69,29 @@ jobs:
           path: out/sprosi-ai-episode-002-elevenlabs.mp4
           if-no-files-found: error
           compression-level: 0
+
+  recording:
+    if: inputs.episode == 'episode-003-voices'
+    name: Episode 003 / ${{ matrix.provider }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    strategy:
+      fail-fast: false
+      matrix:
+        provider: [google, elevenlabs]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Record Russian dialogue
+        env:
+          SPROSI_AI_OZVUCHKA: ${{ matrix.provider == 'google' && secrets.SPROSI_AI_OZVUCHKA || '' }}
+          ELEVEN_LABS9: ${{ matrix.provider == 'elevenlabs' && secrets.ELEVEN_LABS9 || '' }}
+        run: node scripts/generate-voice-variants.mjs --provider=${{ matrix.provider }} src/episodes/episode-003-voice.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dialogue-003-${{ matrix.provider }}
+          path: public/audio/episode-003/${{ matrix.provider }}/*.mp3
+          if-no-files-found: error
+          retention-days: 14
