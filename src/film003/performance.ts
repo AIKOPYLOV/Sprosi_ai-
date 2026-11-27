@@ -106,7 +106,9 @@ export function buildRig(canvas: HTMLCanvasElement, image: HTMLImageElement, cel
   for (let j=0; j<=ny; j++) for (let i=0; i<=nx; i++) {
     const u=i/nx, v=j/ny;
     points.push([u*w,v*h]);
-    const head=(1-smooth(.394,.55,v)) * (phone ? 1-region(u,v,.90,.51,.25,.20) : 1);
+    // Keep the eyes, nose and mouth on a rigid head layer. Previously the soft
+    // skinning falloff began across the lower face, stretching the jaw on speech beats.
+    const head=(1-smooth(.51,.67,v)) * (phone ? 1-region(u,v,.90,.51,.25,.20) : 1);
     const arm=phone ? region(u,v,.805,.575,.34,.30) : region(u,v,.205,.645,.36,.294);
     const tip=phone ? region(u,v,.84,.49,.20,.20) : region(u,v,.133,.59,.23,.19);
     const brow=region(u,v,phone ? .565 : .609,.221,.16,.067);
@@ -167,7 +169,7 @@ export function buildRig(canvas: HTMLCanvasElement, image: HTMLImageElement, cel
         const [x,y]=points[n], [body,skull,limb,tip,brow]=weights[n];
         const hx=x-headPivot[0],hy=y-headPivot[1], ax=x-handPivot[0],ay=y-handPivot[1];
         const dx=p.lean*body + skull*(hc*hx-hs*hy) + limb*(ac*ax-as*ay+p.reach);
-        const dy=p.lean*.11*body + skull*(hs*hx+hc*hy) + limb*(as*ax+ac*ay) + tip*p.wrist + brow*p.brow;
+        const dy=p.lean*.11*body + skull*(hs*hx+hc*hy) + limb*(as*ax+ac*ay) + tip*p.wrist + brow*p.brow*.28;
         xy[2*n]=(x+dx+pad)/W; xy[2*n+1]=(y+dy+pad)/H;
       }
       paint();
