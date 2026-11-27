@@ -10,13 +10,14 @@ on:
         options:
           - episode-002
           - episode-003-voices
+          - episode-003-elevenlabs
 
 permissions:
   contents: read
 
 jobs:
   gemini-tts:
-    if: inputs.episode != 'episode-003-voices'
+    if: inputs.episode == 'episode-002' || !inputs.episode
     name: Gemini TTS version
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -43,7 +44,7 @@ jobs:
           compression-level: 0
 
   elevenlabs:
-    if: inputs.episode != 'episode-003-voices'
+    if: inputs.episode == 'episode-002' || !inputs.episode
     name: ElevenLabs version
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -71,14 +72,14 @@ jobs:
           compression-level: 0
 
   recording:
-    if: inputs.episode == 'episode-003-voices'
+    if: startsWith(inputs.episode, 'episode-003')
     name: Episode 003 / ${{ matrix.provider }}
     runs-on: ubuntu-latest
     timeout-minutes: 18
     strategy:
       fail-fast: false
       matrix:
-        provider: [google, elevenlabs]
+        provider: ${{ fromJSON(inputs.episode == 'episode-003-elevenlabs' && '["elevenlabs"]' || '["google","elevenlabs"]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -90,6 +91,7 @@ jobs:
           ELEVEN_LABS9: ${{ matrix.provider == 'elevenlabs' && secrets.ELEVEN_LABS9 || '' }}
         run: node scripts/generate-voice-variants.mjs --provider=${{ matrix.provider }} src/episodes/episode-003-voice.json
       - uses: actions/upload-artifact@v4
+        if: "!cancelled()"
         with:
           name: dialogue-003-${{ matrix.provider }}
           path: public/audio/episode-003/${{ matrix.provider }}/*.mp3

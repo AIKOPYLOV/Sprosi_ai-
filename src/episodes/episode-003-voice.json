@@ -2,6 +2,14 @@
   "episodeId": "episode-003",
   "language": "ru-RU",
   "title": "Третий гайд",
+  "elevenLabsCast": {
+    "hero": [{"voice_id":"onwK4e9ZLuTAKqWW03F9","name":"Daniel"}],
+    "client": [
+      {"voice_id":"EXAVITQu4vr4xnSDxMaL","name":"Sarah"},
+      {"voice_id":"21m00Tcm4TlvDq8ikWAM","name":"Rachel"},
+      {"voice_id":"Xb7hH8MSUJpSbSDYk0k2","name":"Alice"}
+    ]
+  },
   "lines": [
     {"id":"buy","voice":"hero","delivery":"Разговорный русский. Молодой мужчина признаётся другу с сухой самоиронией. После первого предложения пауза, слово «ноль» тихое.","text":"Третий гайд купил. А роликов выложил… ноль."},
     {"id":"shift","voice":"hero","delivery":"Спокойно, устало после смены, но с живой интонацией.","text":"После смены сил хватает только смотреть, как начинают другие."},

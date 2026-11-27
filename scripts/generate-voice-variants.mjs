@@ -85,7 +85,9 @@ async function elevenTts(line, voice) {
   });
   if (!response.ok) {
     const message = await response.text();
-    throw new Error(`ElevenLabs TTS failed (${response.status}): ${message.slice(0, 500)}`);
+    const error = new Error(`ElevenLabs TTS failed (${response.status}): ${message.slice(0, 500)}`);
+    error.voiceUnavailable = response.status === 404 || (response.status === 402 && /library voices|paid_plan_required/i.test(message));
+    throw error;
   }
   return Buffer.from(await response.arrayBuffer());
 }
@@ -96,12 +98,28 @@ const voices = personalVoiceId
   : fallbackVoices;
 if (provider !== 'google') console.log(`ElevenLabs voices selected: hero=${voices.hero.name}; client=${voices.client.name}`);
 
+const cast = new Map();
+async function recordRole(line) {
+  const role = line.voice === 'client' ? 'client' : 'hero';
+  if (cast.has(role)) return elevenTts(line, cast.get(role));
+  const choices = (!personalVoiceId && script.elevenLabsCast?.[role]) || [voices[role]];
+  for (const [index, choice] of choices.entries()) {
+    try {
+      const audio = await elevenTts(line, choice);
+      cast.set(role, choice);
+      console.log(`Recording ${role} as ${choice.name}`);
+      return audio;
+    } catch (error) {
+      if (!error.voiceUnavailable || index === choices.length - 1) throw error;
+    }
+  }
+}
+
 for (const line of script.lines) {
   const outputs = [];
   if (['both', 'google'].includes(provider)) outputs.push(['google', await googleTts(line)]);
   if (['both', 'elevenlabs'].includes(provider)) {
-    const voice = line.voice === 'client' ? voices.client : voices.hero;
-    outputs.push(['elevenlabs', await elevenTts(line, voice)]);
+    outputs.push(['elevenlabs', await recordRole(line)]);
   }
   for (const [variant, buffer] of outputs) {
     const output = path.join(root, variant, `${line.id}.mp3`);
