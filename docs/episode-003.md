@@ -35,7 +35,7 @@ npm ci
 python -m pip install numpy scipy
 node scripts/generate-voice-variants.mjs --provider=elevenlabs src/episodes/episode-003-voice.json
 python scripts/mix-episode-003.py elevenlabs
-npx remotion render src/index.tsx NightShiftElevenLabs out/tretiy-gaid-elevenlabs.mp4 --codec=h264 --crf=18 --gl=swangle
+npx remotion render src/index.tsx NightShiftElevenLabs out/tretiy-gaid-elevenlabs.mp4 --codec=h264 --crf=18
 ```
 
 Для варианта Google Translate TTS выполните `python scripts/record-google-public-003.py`, затем `python scripts/mix-episode-003.py google-public` и рендерите `NightShiftGoogle`. Для Gemini используются `--provider=google`, `mix-episode-003.py google` и композиция `NightShiftGemini`. В этой сессии Gemini вернул HTTP 402 из-за исчерпанного баланса проекта.
