@@ -7,8 +7,8 @@ permissions:
   contents: read
 
 jobs:
-  google-tts:
-    name: Google TTS version
+  gemini-tts:
+    name: Gemini TTS version
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
@@ -18,18 +18,18 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - name: Generate Google voice clips (Gemini with Cloud TTS fallback)
+      - name: Generate Gemini voice clips
         env:
           SPROSI_AI_OZVUCHKA: ${{ secrets.SPROSI_AI_OZVUCHKA }}
-        run: node scripts/generate-voice-variants.mjs --provider=google
+        run: node scripts/generate-voice-variants.mjs --provider=google src/episodes/episode-002-voice.json
       - run: node scripts/create-sound-effects.mjs
       - run: npx remotion browser ensure
       - name: Render video
-        run: npx remotion render src/index.tsx SprosiAcademyPromoGoogle out/sprosi-ai-google-tts.mp4 --codec=h264 --crf=21 --concurrency=2
+        run: npx remotion render src/index.tsx SprosiAcademyStoryPromoGemini out/sprosi-ai-episode-002-gemini.mp4 --codec=h264 --crf=21 --concurrency=2
       - uses: actions/upload-artifact@v4
         with:
-          name: sprosi-ai-google-tts
-          path: out/sprosi-ai-google-tts.mp4
+          name: sprosi-ai-episode-002-gemini
+          path: out/sprosi-ai-episode-002-gemini.mp4
           if-no-files-found: error
           compression-level: 0
 
@@ -48,14 +48,14 @@ jobs:
         env:
           ELEVEN_LABS9: ${{ secrets.ELEVEN_LABS9 }}
           ELEVENLABS_VOICE_ID: ${{ vars.ELEVENLABS_VOICE_ID }}
-        run: node scripts/generate-voice-variants.mjs --provider=elevenlabs
+        run: node scripts/generate-voice-variants.mjs --provider=elevenlabs src/episodes/episode-002-voice.json
       - run: node scripts/create-sound-effects.mjs
       - run: npx remotion browser ensure
       - name: Render video
-        run: npx remotion render src/index.tsx SprosiAcademyPromoElevenLabs out/sprosi-ai-elevenlabs.mp4 --codec=h264 --crf=21 --concurrency=2
+        run: npx remotion render src/index.tsx SprosiAcademyStoryPromoElevenLabs out/sprosi-ai-episode-002-elevenlabs.mp4 --codec=h264 --crf=21 --concurrency=2
       - uses: actions/upload-artifact@v4
         with:
-          name: sprosi-ai-elevenlabs
-          path: out/sprosi-ai-elevenlabs.mp4
+          name: sprosi-ai-episode-002-elevenlabs
+          path: out/sprosi-ai-episode-002-elevenlabs.mp4
           if-no-files-found: error
           compression-level: 0
