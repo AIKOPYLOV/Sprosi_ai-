@@ -3,7 +3,7 @@ import {AbsoluteFill, Audio, Composition, Easing, Sequence, interpolate, staticF
 
 const FPS = 30;
 const SHOT = 2 * FPS;
-const TOTAL = SHOT * 3;
+const TOTAL = SHOT * 5;
 const clamp = {extrapolateLeft:'clamp' as const, extrapolateRight:'clamp' as const};
 
 const PixelRoom:FC<{frame:number; mood?:'late'|'warm'}> = ({frame,mood='late'}) => <svg viewBox="0 0 270 480" width="1080" height="1920" style={{position:'absolute',inset:0,imageRendering:'pixelated'}} shapeRendering="crispEdges">
@@ -136,6 +136,74 @@ const Shot03:FC=()=>{
   </AbsoluteFill>;
 };
 
+const OrbitCharacter:FC<{frame:number;angle:number}> = ({frame,angle})=>{
+  const view=angle<50?0:angle<140?1:angle<230?2:angle<320?3:0;
+  const local=frame%15;
+  const squash=interpolate(local,[0,7,14],[1,.6,1],clamp);
+  return <svg viewBox="0 0 270 480" width="1080" height="1920" style={{position:'absolute',inset:0,imageRendering:'pixelated'}} shapeRendering="crispEdges">
+    <g transform={`translate(135 0) scale(${squash} 1) translate(-135 0)`}>
+      {view===0?<g transform={`translate(101 ${190+Math.abs(Math.sin(frame/7))*2})`}>
+        <rect x="19" y="0" width="34" height="9" fill="#171a24"/><rect x="13" y="7" width="45" height="12" fill="#252633"/>
+        <rect x="17" y="14" width="38" height="41" fill="#d89970"/><rect x="10" y="13" width="8" height="16" fill="#252633"/><rect x="53" y="13" width="7" height="16" fill="#252633"/>
+        <rect x="23" y="28" width="9" height="8" fill="#fff0d8"/><rect x="42" y="28" width="9" height="8" fill="#fff0d8"/><rect x="27" y="31" width="4" height="5" fill="#263850"/><rect x="44" y="31" width="4" height="5" fill="#263850"/><rect x="31" y="47" width="16" height="4" fill="#793d43"/>
+        <rect x="29" y="54" width="16" height="10" fill="#c78363"/><rect x="12" y="62" width="50" height="59" fill="#557a68"/><rect x="17" y="62" width="12" height="12" fill="#eee2c8"/><rect x="45" y="62" width="12" height="12" fill="#eee2c8"/><rect x="35" y="73" width="3" height="45" fill="#3f6256"/>
+        <rect x="4" y="75" width="12" height="24" fill="#557a68"/><rect x="0" y="96" width="12" height="18" fill="#d89970"/><rect x="54" y="75" width="11" height="19" fill="#557a68"/><rect x="58" y="91" width="10" height="16" fill="#d89970"/>
+        <rect x="16" y="119" width="17" height="31" fill="#303d50"/><rect x="12" y="146" width="22" height="7" fill="#e5d9c5"/><rect x="41" y="119" width="17" height="31" fill="#303d50"/><rect x="40" y="146" width="22" height="7" fill="#e5d9c5"/>
+      </g>:null}
+      {view===1||view===3?<g transform={`translate(${view===1?110:154} 190) scale(${view===3?-1:1} 1)`}>
+        <rect x="16" y="4" width="39" height="16" fill="#20232d"/><rect x="10" y="15" width="42" height="22" fill="#20232d"/>
+        <rect x="18" y="18" width="34" height="40" fill="#d89970"/><rect x="47" y="33" width="8" height="8" fill="#d89970"/><rect x="41" y="31" width="5" height="6" fill="#263850"/><rect x="32" y="45" width="12" height="3" fill="#793d43"/>
+        <rect x="15" y="59" width="45" height="63" fill="#557a68"/><rect x="21" y="60" width="11" height="12" fill="#eee2c8"/><rect x="16" y="121" width="19" height="33" fill="#303d50"/><rect x="42" y="121" width="18" height="33" fill="#303d50"/>
+      </g>:null}
+      {view===2?<g transform="translate(103 188)">
+        <rect x="17" y="2" width="42" height="50" fill="#20232d"/><rect x="10" y="12" width="56" height="44" fill="#20232d"/><rect x="17" y="15" width="42" height="44" fill="#252633"/>
+        <rect x="24" y="56" width="27" height="10" fill="#c78363"/><rect x="8" y="65" width="59" height="56" fill="#557a68"/><rect x="30" y="71" width="16" height="26" fill="#47685c"/><rect x="15" y="120" width="20" height="33" fill="#303d50"/><rect x="42" y="120" width="20" height="33" fill="#303d50"/>
+        <rect x="3" y="76" width="8" height="23" fill="#557a68"/><rect x="64" y="76" width="8" height="23" fill="#557a68"/>
+      </g>:null}
+    </g>
+  </svg>;
+};
+
+const Shot04Orbit:FC=()=>{
+  const f=useCurrentFrame();
+  const angle=interpolate(f,[0,59],[0,360],clamp);
+  const shift=Math.sin(angle*Math.PI/180)*130;
+  const tilt=Math.sin(angle*Math.PI/180)*9;
+  const zoom=interpolate(f,[0,29,59],[1.03,1.12,1.03],{...clamp,easing:Easing.inOut(Easing.cubic)});
+  return <AbsoluteFill style={{overflow:'hidden',background:'#182238'}}>
+    {/* layered camera sweep: far wall drifts less, desk and foreground drift more */}
+    <div style={{position:'absolute',inset:0,transform:`perspective(1550px) rotateY(${tilt}deg) scale(${zoom}) translateX(${-shift*.32}px)`,transformOrigin:'center'}}><PixelRoom frame={f+180} mood="warm"/></div>
+    <div style={{position:'absolute',left:0,right:0,top:820,height:490,background:'#b78052',borderTop:'22px solid #d29a61',borderBottom:'20px solid #684837',transform:`translateX(${-shift*.78}px) scaleX(1.08)`,transformOrigin:'center'}}/>
+    <div style={{position:'absolute',left:55,top:840,width:145,height:280,transform:`translateX(${shift*.55}px) scale(${1+Math.abs(shift)/900})`}}><div style={{position:'absolute',left:40,top:120,width:76,height:116,background:'#855d48',border:'8px solid #171d2a'}}/><div style={{position:'absolute',left:35,top:5,width:28,height:130,background:'#70a48b',transform:'rotate(-18deg)'}}/><div style={{position:'absolute',left:84,top:20,width:33,height:130,background:'#56866e',transform:'rotate(15deg)'}}/><div style={{position:'absolute',left:103,top:51,width:31,height:90,background:'#75a98c'}}/></div>
+    <OrbitCharacter frame={f} angle={angle}/>
+    <div style={{position:'absolute',top:98,left:0,right:0,textAlign:'center',font:'900 30px Arial',color:'#fff1cf',textShadow:'0 3px #172235'}}>КАМЕРА · {Math.round(angle)}°</div>
+    <Caption>ОБЛЁТ 360° В 2.5D: РАКУРС МЕНЯЕТСЯ, ФОН ИДЁТ СЛОЯМИ.</Caption>
+    <Progress frame={f} index={3}/>
+  </AbsoluteFill>;
+};
+
+const Shot05Flythrough:FC=()=>{
+  const f=useCurrentFrame();
+  const zoom=interpolate(f,[0,10,59],[1,1.08,4.75],{...clamp,easing:Easing.inOut(Easing.cubic)});
+  const dx=interpolate(f,[0,59],[0,-318],{...clamp,easing:Easing.inOut(Easing.cubic)});
+  const dy=interpolate(f,[0,59],[0,118],{...clamp,easing:Easing.inOut(Easing.cubic)});
+  return <AbsoluteFill style={{overflow:'hidden',background:'#182238'}}>
+    <PixelRoom frame={f+240} mood="warm"/>
+    <PixelIlya frame={f+240} x={24} y={208} expression="confident" gesture="wave"/>
+    <div style={{position:'absolute',left:737,top:620,width:238,height:410,transformOrigin:'center',transform:`translate(${dx}px,${dy}px) scale(${zoom})`,border:'12px solid #101827',borderRadius:24,background:'#1b293a',boxShadow:'0 18px 0 #101722',overflow:'hidden'}}>
+      <div style={{position:'absolute',top:20,left:77,width:70,height:8,background:'#52616a',borderRadius:9}}/>
+      <div style={{position:'absolute',inset:'48px 13px 115px',background:'#a2c9b4',border:'5px solid #d8e4c9',padding:10,boxSizing:'border-box'}}>
+        <div style={{background:'#4c806e',padding:10,color:'#f4e7c9',font:'900 17px Arial',textAlign:'center'}}>МИНИ-УРОК · EXCEL</div>
+        <div style={{marginTop:15,padding:10,background:'#e4efdb',border:'3px solid #668d78',font:'900 20px/1.1 Arial',color:'#293c3a',textAlign:'center'}}>ДУБЛИ<br/>В ТАБЛИЦЕ?</div>
+        <div style={{display:'flex',justifyContent:'center',gap:9,marginTop:12,font:'900 21px Arial',color:'#25373c'}}><span style={{padding:8,background:'#efc762'}}>НАЙТИ</span><span style={{padding:8,background:'#d8e7d4'}}>✓</span></div>
+        <div style={{marginTop:13,padding:8,background:'#203647',color:'#fff1cf',font:'900 17px Arial',textAlign:'center'}}>НАЖМИ: УБРАТЬ ДУБЛЬ</div>
+      </div>
+    </div>
+    <Caption>ПРОЛЁТ В ЭКРАН — И МЫ УЖЕ ВНУТРИ УРОКА.</Caption>
+    <Progress frame={f} index={4}/>
+  </AbsoluteFill>;
+};
+
 const Progress:FC<{frame:number;index:number}> = ({frame,index})=><div style={{position:'absolute',left:66,right:66,bottom:48,height:6,background:'#ffffff44'}}><div style={{height:6,width:`${((index*SHOT+frame+1)/TOTAL)*100}%`,background:'#f1c764'}}/></div>;
 
 const Sound:FC=()=> <>
@@ -144,12 +212,16 @@ const Sound:FC=()=> <>
   <Sequence from={SHOT+24} durationInFrames={15}><Audio src={staticFile('audio/episode-001/sfx/tick.wav')} volume={0.22}/></Sequence>
   <Sequence from={2*SHOT-3} durationInFrames={32}><Audio src={staticFile('audio/episode-001/sfx/whoosh.wav')} volume={0.18}/></Sequence>
   <Sequence from={2*SHOT+34} durationInFrames={22}><Audio src={staticFile('audio/episode-001/sfx/resolution.wav')} volume={0.22}/></Sequence>
+  <Sequence from={3*SHOT+6} durationInFrames={24}><Audio src={staticFile('audio/episode-001/sfx/whoosh.wav')} volume={0.24}/></Sequence>
+  <Sequence from={4*SHOT+8} durationInFrames={32}><Audio src={staticFile('audio/episode-001/sfx/whoosh.wav')} volume={0.28}/></Sequence>
 </>;
 
 export const Pixel32Demo:FC=()=> <AbsoluteFill style={{background:'#182238'}}>
   <Sequence from={0} durationInFrames={SHOT} premountFor={FPS}><Shot01/></Sequence>
   <Sequence from={SHOT} durationInFrames={SHOT} premountFor={FPS}><Shot02/></Sequence>
   <Sequence from={2*SHOT} durationInFrames={SHOT} premountFor={FPS}><Shot03/></Sequence>
+  <Sequence from={3*SHOT} durationInFrames={SHOT} premountFor={FPS}><Shot04Orbit/></Sequence>
+  <Sequence from={4*SHOT} durationInFrames={SHOT} premountFor={FPS}><Shot05Flythrough/></Sequence>
   <Sound/>
 </AbsoluteFill>;
 
